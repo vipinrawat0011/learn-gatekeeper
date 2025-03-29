@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { 
-  Users, ChalkboardTeacher, GraduationCap, UserPlus, Search, Filter, MoreHorizontal, Edit, Trash2
+  Users, School, UserPlus, Search, Filter, MoreHorizontal, Edit, Trash2,
+  GraduationCap, BookOpen
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -151,7 +152,7 @@ export default function UserManagementPage() {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="teachers">
-                <ChalkboardTeacher className="h-4 w-4 mr-2" /> Teachers
+                <BookOpen className="h-4 w-4 mr-2" /> Teachers
               </TabsTrigger>
               <TabsTrigger value="students">
                 <GraduationCap className="h-4 w-4 mr-2" /> Students

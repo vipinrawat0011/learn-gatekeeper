@@ -2,318 +2,462 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Check, ChevronRight, Filter, Search } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from "recharts";
+
+// Sample data for charts
+const performanceData = [
+  {
+    name: "Jan",
+    mathematics: 78,
+    science: 65,
+    english: 82,
+    history: 70,
+  },
+  {
+    name: "Feb",
+    mathematics: 80,
+    science: 68,
+    english: 80,
+    history: 72,
+  },
+  {
+    name: "Mar",
+    mathematics: 83,
+    science: 72,
+    english: 81,
+    history: 75,
+  },
+  {
+    name: "Apr",
+    mathematics: 85,
+    science: 76,
+    english: 83,
+    history: 78,
+  },
+  {
+    name: "May",
+    mathematics: 88,
+    science: 80,
+    english: 85,
+    history: 80,
+  },
+  {
+    name: "Jun",
+    mathematics: 90,
+    science: 85,
+    english: 88,
+    history: 83,
+  },
+];
+
+// Sample attendance data
+const attendanceData = [
+  {
+    name: "Jan",
+    present: 90,
+    absent: 10,
+  },
+  {
+    name: "Feb",
+    present: 88,
+    absent: 12,
+  },
+  {
+    name: "Mar",
+    present: 92,
+    absent: 8,
+  },
+  {
+    name: "Apr",
+    present: 94,
+    absent: 6,
+  },
+  {
+    name: "May",
+    present: 91,
+    absent: 9,
+  },
+  {
+    name: "Jun",
+    present: 93,
+    absent: 7,
+  },
+];
+
+// Sample student data
+const studentData = [
+  {
+    id: 1,
+    name: "Alex Johnson",
+    class: "10",
+    section: "A",
+    overallScore: 87,
+    attendance: 94,
+    tasksCompleted: 25,
+    tasksTotal: 30,
+    scholarLevel: "Rising Intellect",
+  },
+  {
+    id: 2,
+    name: "Maria Rodriguez",
+    class: "10",
+    section: "A",
+    overallScore: 92,
+    attendance: 98,
+    tasksCompleted: 28,
+    tasksTotal: 30,
+    scholarLevel: "Mastermind Elite",
+  },
+  {
+    id: 3,
+    name: "Jason Smith",
+    class: "10",
+    section: "A",
+    overallScore: 75,
+    attendance: 88,
+    tasksCompleted: 22,
+    tasksTotal: 30,
+    scholarLevel: "Junior Scholar",
+  },
+  {
+    id: 4,
+    name: "Priya Patel",
+    class: "10",
+    section: "A",
+    overallScore: 95,
+    attendance: 99,
+    tasksCompleted: 30,
+    tasksTotal: 30,
+    scholarLevel: "Mastermind Elite",
+  },
+  {
+    id: 5,
+    name: "David Lee",
+    class: "10",
+    section: "B",
+    overallScore: 88,
+    attendance: 92,
+    tasksCompleted: 26,
+    tasksTotal: 30,
+    scholarLevel: "Rising Intellect",
+  },
+  {
+    id: 6,
+    name: "Sophia Chen",
+    class: "10",
+    section: "B",
+    overallScore: 83,
+    attendance: 90,
+    tasksCompleted: 24,
+    tasksTotal: 30,
+    scholarLevel: "Rising Intellect",
+  },
+];
 
 export default function ProgressTrackingPage() {
   const [selectedClass, setSelectedClass] = useState("10");
   const [selectedSection, setSelectedSection] = useState("A");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Sample data
-  const performanceData = [
-    { subject: "Mathematics", excellent: 12, good: 8, average: 5, poor: 2 },
-    { subject: "Science", excellent: 10, good: 10, average: 6, poor: 1 },
-    { subject: "English", excellent: 8, good: 12, average: 7, poor: 0 },
-    { subject: "History", excellent: 7, good: 11, average: 8, poor: 1 },
-    { subject: "Geography", excellent: 9, good: 10, average: 6, poor: 2 },
-  ];
+  // Filter students based on selected class, section, and search term
+  const filteredStudents = studentData.filter(
+    (student) =>
+      student.class === selectedClass &&
+      student.section === selectedSection &&
+      student.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const completionRateData = [
-    { name: "Completed", value: 75 },
-    { name: "In Progress", value: 20 },
-    { name: "Not Started", value: 5 },
-  ];
+  // Calculate counts for each scholar level
+  const scholarLevelCounts = {
+    juniorScholar: filteredStudents.filter(
+      (s) => s.scholarLevel === "Junior Scholar"
+    ).length,
+    risingIntellect: filteredStudents.filter(
+      (s) => s.scholarLevel === "Rising Intellect"
+    ).length,
+    mastermindElite: filteredStudents.filter(
+      (s) => s.scholarLevel === "Mastermind Elite"
+    ).length,
+  };
 
-  const COLORS = ["#22c55e", "#3b82f6", "#ef4444"];
+  // Get badge color based on scholar level
+  const getScholarLevelColor = (level) => {
+    switch (level) {
+      case "Junior Scholar":
+        return "bg-blue-100 text-blue-800";
+      case "Rising Intellect":
+        return "bg-purple-100 text-purple-800";
+      case "Mastermind Elite":
+        return "bg-amber-100 text-amber-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  // Get badge variant based on completion percentage
+  const getTaskCompletionVariant = (completed, total) => {
+    const percentage = (completed / total) * 100;
+    if (percentage >= 90) return "default";
+    if (percentage >= 70) return "secondary";
+    return "destructive";
+  };
 
   return (
-    <DashboardLayout 
-      role="admin" 
+    <DashboardLayout
+      role="admin"
       title="Progress Tracking"
-      subtitle="Track student progress and academic performance"
+      subtitle="Track and analyze student progress across classes"
     >
-      <div className="mb-6 flex flex-col sm:flex-row gap-4">
-        <Select value={selectedClass} onValueChange={setSelectedClass}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select class" />
-          </SelectTrigger>
-          <SelectContent>
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((classNum) => (
-              <SelectItem key={classNum} value={classNum.toString()}>
-                Class {classNum}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        
-        <Select value={selectedSection} onValueChange={setSelectedSection}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select section" />
-          </SelectTrigger>
-          <SelectContent>
-            {["A", "B", "C"].map((section) => (
-              <SelectItem key={section} value={section}>
-                Section {section}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="mb-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Select
+              value={selectedClass}
+              onValueChange={setSelectedClass}
+            >
+              <SelectTrigger className="w-[100px]">
+                <SelectValue placeholder="Class" />
+              </SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((classNum) => (
+                  <SelectItem key={classNum} value={classNum.toString()}>
+                    Class {classNum}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={selectedSection}
+              onValueChange={setSelectedSection}
+            >
+              <SelectTrigger className="w-[100px]">
+                <SelectValue placeholder="Section" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="A">Section A</SelectItem>
+                <SelectItem value="B">Section B</SelectItem>
+                <SelectItem value="C">Section C</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search students..."
+                className="pl-8 w-[250px]"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <Button variant="outline" size="icon">
+              <Filter className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div className="flex gap-4">
+            <Button variant="outline">Export Report</Button>
+          </div>
+        </div>
+
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+          <Card>
+            <CardContent className="p-4 flex justify-between items-center">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Junior Scholar
+                </p>
+                <p className="text-2xl font-bold">{scholarLevelCounts.juniorScholar}</p>
+              </div>
+              <div className="bg-blue-100 p-3 rounded-full">
+                <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex justify-between items-center">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Rising Intellect
+                </p>
+                <p className="text-2xl font-bold">{scholarLevelCounts.risingIntellect}</p>
+              </div>
+              <div className="bg-purple-100 p-3 rounded-full">
+                <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex justify-between items-center">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Mastermind Elite
+                </p>
+                <p className="text-2xl font-bold">{scholarLevelCounts.mastermindElite}</p>
+              </div>
+              <div className="bg-amber-100 p-3 rounded-full">
+                <div className="w-4 h-4 bg-amber-500 rounded-full"></div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3 mb-6">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-1">Overall Completion Rate</p>
-              <p className="text-4xl font-bold text-green-600">75%</p>
-              <p className="text-xs text-muted-foreground mt-1">+5% from last month</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-1">Average Performance</p>
-              <p className="text-4xl font-bold text-blue-600">B+</p>
-              <p className="text-xs text-muted-foreground mt-1">Improved from B</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-1">Student Classification</p>
-              <div className="flex justify-center gap-2 mt-2">
-                <Badge variant="outline" className="bg-green-50">
-                  15 Elite
-                </Badge>
-                <Badge variant="outline" className="bg-blue-50">
-                  10 Rising
-                </Badge>
-                <Badge variant="outline" className="bg-orange-50">
-                  8 Junior
-                </Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <div className="grid gap-6 md:grid-cols-2 mb-6">
+      <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Subject Performance</CardTitle>
+            <CardTitle>Performance Overview - Class {selectedClass}{selectedSection}</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={performanceData}
-                margin={{
-                  top: 20,
-                  right: 30,
-                  left: 20,
-                  bottom: 5,
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="subject" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="excellent" stackId="a" fill="#22c55e" />
-                <Bar dataKey="good" stackId="a" fill="#3b82f6" />
-                <Bar dataKey="average" stackId="a" fill="#f59e0b" />
-                <Bar dataKey="poor" stackId="a" fill="#ef4444" />
-              </BarChart>
-            </ResponsiveContainer>
+            <Tabs defaultValue="academic">
+              <TabsList className="mb-4">
+                <TabsTrigger value="academic">Academic Performance</TabsTrigger>
+                <TabsTrigger value="attendance">Attendance</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="academic">
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={performanceData}
+                      margin={{
+                        top: 5,
+                        right: 30,
+                        left: 20,
+                        bottom: 5,
+                      }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="mathematics"
+                        stroke="#8884d8"
+                        activeDot={{ r: 8 }}
+                      />
+                      <Line type="monotone" dataKey="science" stroke="#82ca9d" />
+                      <Line type="monotone" dataKey="english" stroke="#ffc658" />
+                      <Line type="monotone" dataKey="history" stroke="#ff8042" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="attendance">
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={attendanceData}
+                      margin={{
+                        top: 5,
+                        right: 30,
+                        left: 20,
+                        bottom: 5,
+                      }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="present" fill="#82ca9d" name="Present %" />
+                      <Bar dataKey="absent" fill="#ff8042" name="Absent %" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
-            <CardTitle>Course Completion Rate</CardTitle>
+            <CardTitle>Students Progress - Class {selectedClass}{selectedSection}</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={completionRateData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                >
-                  {completionRateData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-3 font-medium">Student Name</th>
+                    <th className="text-left p-3 font-medium">Overall Score</th>
+                    <th className="text-left p-3 font-medium">Attendance</th>
+                    <th className="text-left p-3 font-medium">Tasks Completed</th>
+                    <th className="text-left p-3 font-medium">Scholar Level</th>
+                    <th className="text-right p-3 font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredStudents.map((student) => (
+                    <tr key={student.id} className="border-b hover:bg-muted/30">
+                      <td className="p-3 font-medium">{student.name}</td>
+                      <td className="p-3">{student.overallScore}%</td>
+                      <td className="p-3">{student.attendance}%</td>
+                      <td className="p-3">
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant={getTaskCompletionVariant(
+                              student.tasksCompleted,
+                              student.tasksTotal
+                            )}
+                          >
+                            {student.tasksCompleted}/{student.tasksTotal}
+                          </Badge>
+                          {student.tasksCompleted === student.tasksTotal && (
+                            <Check className="h-4 w-4 text-green-500" />
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <span
+                          className={`inline-block px-2 py-1 rounded-full text-xs ${getScholarLevelColor(
+                            student.scholarLevel
+                          )}`}
+                        >
+                          {student.scholarLevel}
+                        </span>
+                      </td>
+                      <td className="p-3 text-right">
+                        <Button variant="ghost" size="sm">
+                          View Details <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
+                      </td>
+                    </tr>
                   ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+                </tbody>
+              </table>
+            </div>
           </CardContent>
         </Card>
       </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Student Progress Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="topPerformers">
-            <TabsList className="mb-6">
-              <TabsTrigger value="topPerformers">Top Performers</TabsTrigger>
-              <TabsTrigger value="needsImprovement">Needs Improvement</TabsTrigger>
-              <TabsTrigger value="mostImproved">Most Improved</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="topPerformers">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-3 font-medium">Name</th>
-                      <th className="text-left p-3 font-medium">Roll No.</th>
-                      <th className="text-left p-3 font-medium">Classification</th>
-                      <th className="text-left p-3 font-medium">Average Grade</th>
-                      <th className="text-left p-3 font-medium">Completion</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      { id: 1, name: "Alice Johnson", rollNo: "10A01", classification: "Mastermind Elite", grade: "A+", completion: 98 },
-                      { id: 2, name: "Bob Smith", rollNo: "10A05", classification: "Mastermind Elite", grade: "A", completion: 95 },
-                      { id: 3, name: "Charlie Davis", rollNo: "10A12", classification: "Rising Intellect", grade: "A", completion: 90 },
-                      { id: 4, name: "Diana Miller", rollNo: "10A08", classification: "Mastermind Elite", grade: "A+", completion: 97 },
-                      { id: 5, name: "Ethan Wilson", rollNo: "10A15", classification: "Rising Intellect", grade: "A-", completion: 92 },
-                    ].map((student) => (
-                      <tr key={student.id} className="border-b hover:bg-muted/30">
-                        <td className="p-3">{student.name}</td>
-                        <td className="p-3">{student.rollNo}</td>
-                        <td className="p-3">
-                          <Badge variant={
-                            student.classification === "Mastermind Elite" 
-                              ? "default" 
-                              : "secondary"
-                          }>
-                            {student.classification}
-                          </Badge>
-                        </td>
-                        <td className="p-3">{student.grade}</td>
-                        <td className="p-3">
-                          <div className="flex items-center gap-2">
-                            <div className="bg-gray-200 h-2 rounded-full w-24">
-                              <div 
-                                className="h-full rounded-full bg-green-500"
-                                style={{ width: `${student.completion}%` }}
-                              ></div>
-                            </div>
-                            <span className="text-xs">{student.completion}%</span>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="needsImprovement">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-3 font-medium">Name</th>
-                      <th className="text-left p-3 font-medium">Roll No.</th>
-                      <th className="text-left p-3 font-medium">Classification</th>
-                      <th className="text-left p-3 font-medium">Average Grade</th>
-                      <th className="text-left p-3 font-medium">Completion</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      { id: 6, name: "Fiona Roberts", rollNo: "10A24", classification: "Junior Scholar", grade: "C", completion: 65 },
-                      { id: 7, name: "George Thompson", rollNo: "10A18", classification: "Junior Scholar", grade: "C+", completion: 68 },
-                      { id: 8, name: "Hannah Martin", rollNo: "10A22", classification: "Junior Scholar", grade: "C", completion: 62 },
-                    ].map((student) => (
-                      <tr key={student.id} className="border-b hover:bg-muted/30">
-                        <td className="p-3">{student.name}</td>
-                        <td className="p-3">{student.rollNo}</td>
-                        <td className="p-3">
-                          <Badge variant="outline">
-                            {student.classification}
-                          </Badge>
-                        </td>
-                        <td className="p-3">{student.grade}</td>
-                        <td className="p-3">
-                          <div className="flex items-center gap-2">
-                            <div className="bg-gray-200 h-2 rounded-full w-24">
-                              <div 
-                                className="h-full rounded-full bg-orange-500"
-                                style={{ width: `${student.completion}%` }}
-                              ></div>
-                            </div>
-                            <span className="text-xs">{student.completion}%</span>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="mostImproved">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-3 font-medium">Name</th>
-                      <th className="text-left p-3 font-medium">Roll No.</th>
-                      <th className="text-left p-3 font-medium">Classification</th>
-                      <th className="text-left p-3 font-medium">Current Grade</th>
-                      <th className="text-left p-3 font-medium">Improvement</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      { id: 9, name: "Ian Baker", rollNo: "10A14", classification: "Rising Intellect", grade: "B+", improvement: "+2 grades" },
-                      { id: 10, name: "Jessica Clark", rollNo: "10A09", classification: "Rising Intellect", grade: "B", improvement: "+1.5 grades" },
-                      { id: 11, name: "Kevin Adams", rollNo: "10A17", classification: "Junior Scholar", grade: "B-", improvement: "+1.5 grades" },
-                    ].map((student) => (
-                      <tr key={student.id} className="border-b hover:bg-muted/30">
-                        <td className="p-3">{student.name}</td>
-                        <td className="p-3">{student.rollNo}</td>
-                        <td className="p-3">
-                          <Badge variant={
-                            student.classification === "Rising Intellect" 
-                              ? "secondary" 
-                              : "outline"
-                          }>
-                            {student.classification}
-                          </Badge>
-                        </td>
-                        <td className="p-3">{student.grade}</td>
-                        <td className="p-3">
-                          <Badge variant="success">
-                            {student.improvement}
-                          </Badge>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
     </DashboardLayout>
   );
 }

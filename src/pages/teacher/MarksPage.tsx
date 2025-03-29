@@ -1,443 +1,377 @@
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Search, Save, Download, Upload, CheckCircle } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { Calculator, Check, Edit, Filter, Save, Search } from "lucide-react";
+
+// Mock data for testing
+const studentsData = [
+  { 
+    id: 1, 
+    name: "Alex Johnson", 
+    class: "10A", 
+    midTermMarks: 85, 
+    finalMarks: 92, 
+    assignments: 90, 
+    practicals: 88
+  },
+  { 
+    id: 2, 
+    name: "Priya Sharma", 
+    class: "10A", 
+    midTermMarks: 78, 
+    finalMarks: 82, 
+    assignments: 75, 
+    practicals: 85
+  },
+  { 
+    id: 3, 
+    name: "Michael Lee", 
+    class: "10A", 
+    midTermMarks: 92, 
+    finalMarks: 95, 
+    assignments: 88, 
+    practicals: 94
+  },
+  { 
+    id: 4, 
+    name: "Sophia Chen", 
+    class: "10A", 
+    midTermMarks: 68, 
+    finalMarks: 72, 
+    assignments: 65, 
+    practicals: 70
+  },
+  { 
+    id: 5, 
+    name: "James Wilson", 
+    class: "10A", 
+    midTermMarks: 75, 
+    finalMarks: 80, 
+    assignments: 82, 
+    practicals: 78
+  },
+  { 
+    id: 6, 
+    name: "Emma Brown", 
+    class: "10B", 
+    midTermMarks: 88, 
+    finalMarks: 90, 
+    assignments: 92, 
+    practicals: 85
+  },
+  { 
+    id: 7, 
+    name: "Daniel Taylor", 
+    class: "10B", 
+    midTermMarks: 72, 
+    finalMarks: 68, 
+    assignments: 70, 
+    practicals: 75
+  },
+  { 
+    id: 8, 
+    name: "Olivia Davis", 
+    class: "10B", 
+    midTermMarks: 95, 
+    finalMarks: 98, 
+    assignments: 96, 
+    practicals: 92
+  }
+];
 
 export default function MarksPage() {
-  const [selectedClass, setSelectedClass] = useState("10");
-  const [selectedSection, setSelectedSection] = useState("A");
-  const [selectedSubject, setSelectedSubject] = useState("physics");
-  const [selectedExam, setSelectedExam] = useState("midterm");
-
-  const handleSaveMarks = () => {
-    toast({
-      title: "Marks saved successfully",
-      description: "Student marks have been updated",
+  const [selectedClass, setSelectedClass] = useState("10A");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [editingStudentId, setEditingStudentId] = useState<number | null>(null);
+  const [editableMarks, setEditableMarks] = useState({
+    midTerm: 0,
+    final: 0,
+    assignment: 0,
+    practical: 0
+  });
+  
+  // Filter students based on selected class and search term
+  const filteredStudents = studentsData.filter(student => 
+    student.class === selectedClass && 
+    student.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  // Calculate average for the selected class
+  const classAverage = {
+    midTerm: filteredStudents.reduce((sum, student) => sum + student.midTermMarks, 0) / filteredStudents.length,
+    final: filteredStudents.reduce((sum, student) => sum + student.finalMarks, 0) / filteredStudents.length,
+    assignment: filteredStudents.reduce((sum, student) => sum + student.assignments, 0) / filteredStudents.length,
+    practical: filteredStudents.reduce((sum, student) => sum + student.practicals, 0) / filteredStudents.length,
+  };
+  
+  // Start editing student marks
+  const handleEditStudent = (student: typeof studentsData[0]) => {
+    setEditingStudentId(student.id);
+    setEditableMarks({
+      midTerm: student.midTermMarks,
+      final: student.finalMarks,
+      assignment: student.assignments,
+      practical: student.practicals
     });
+  };
+  
+  // Save edited marks (would connect to API in real implementation)
+  const handleSaveMarks = () => {
+    // In a real app, you would save these changes to the database
+    console.log("Saving marks for student ID:", editingStudentId, editableMarks);
+    setEditingStudentId(null);
+  };
+  
+  // Calculate total marks and grade
+  const calculateTotal = (student: typeof studentsData[0]) => {
+    const total = student.midTermMarks + student.finalMarks + student.assignments + student.practicals;
+    return total / 4; // Simple average
+  };
+  
+  const getGrade = (average: number) => {
+    if (average >= 90) return "A+";
+    if (average >= 80) return "A";
+    if (average >= 70) return "B";
+    if (average >= 60) return "C";
+    if (average >= 50) return "D";
+    return "F";
+  };
+  
+  const getBadgeVariant = (average: number) => {
+    if (average >= 80) return "default";
+    if (average >= 60) return "secondary";
+    return "destructive";
   };
 
   return (
-    <DashboardLayout
-      role="teacher"
-      title="Marks Management"
-      subtitle="Enter and manage student marks for various assessments"
+    <DashboardLayout 
+      role="teacher" 
+      title="Student Marks"
+      subtitle="Manage and view marks for all your students"
     >
-      <div className="mb-6 flex flex-col sm:flex-row gap-4">
-        <Select value={selectedClass} onValueChange={setSelectedClass}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select class" />
-          </SelectTrigger>
-          <SelectContent>
-            {[6, 7, 8, 9, 10].map((classNum) => (
-              <SelectItem key={classNum} value={classNum.toString()}>
-                Class {classNum}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={selectedSection} onValueChange={setSelectedSection}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select section" />
-          </SelectTrigger>
-          <SelectContent>
-            {["A", "B", "C"].map((section) => (
-              <SelectItem key={section} value={section}>
-                Section {section}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        
-        <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select subject" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="physics">Physics</SelectItem>
-            <SelectItem value="chemistry">Chemistry</SelectItem>
-            <SelectItem value="biology">Biology</SelectItem>
-            <SelectItem value="mathematics">Mathematics</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <div className="flex-grow">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input 
-              type="search" 
-              placeholder="Search students..." 
-              className="pl-8 w-full" 
-            />
+      <div className="mb-6 space-y-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <Select value={selectedClass} onValueChange={setSelectedClass}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Select class" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10A">Class 10A</SelectItem>
+                <SelectItem value="10B">Class 10B</SelectItem>
+                <SelectItem value="11A">Class 11A</SelectItem>
+                <SelectItem value="11B">Class 11B</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input 
+                type="search" 
+                placeholder="Search students..." 
+                className="pl-8 w-[250px]" 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            <Button variant="outline" size="icon">
+              <Filter className="h-4 w-4" />
+            </Button>
           </div>
+          
+          <Button>
+            <Calculator className="h-4 w-4 mr-2" /> Calculate Class Average
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4 flex flex-col items-center">
+              <p className="text-sm font-medium text-muted-foreground mb-1">Mid-Term Average</p>
+              <p className="text-2xl font-bold">
+                {classAverage.midTerm.toFixed(1)}%
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex flex-col items-center">
+              <p className="text-sm font-medium text-muted-foreground mb-1">Final Exam Average</p>
+              <p className="text-2xl font-bold">
+                {classAverage.final.toFixed(1)}%
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex flex-col items-center">
+              <p className="text-sm font-medium text-muted-foreground mb-1">Assignment Average</p>
+              <p className="text-2xl font-bold">
+                {classAverage.assignment.toFixed(1)}%
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex flex-col items-center">
+              <p className="text-sm font-medium text-muted-foreground mb-1">Practical Average</p>
+              <p className="text-2xl font-bold">
+                {classAverage.practical.toFixed(1)}%
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </div>
       
-      <Card className="mb-6">
+      <Card>
         <CardHeader>
-          <CardTitle>Enter Marks - Class {selectedClass}{selectedSection} ({selectedSubject.charAt(0).toUpperCase() + selectedSubject.slice(1)})</CardTitle>
+          <CardTitle>Student Marks - {selectedClass}</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue={selectedExam} onValueChange={setSelectedExam}>
-            <TabsList className="mb-6">
-              <TabsTrigger value="midterm">Mid-Term</TabsTrigger>
-              <TabsTrigger value="final">Final Exam</TabsTrigger>
-              <TabsTrigger value="practicals">Practicals</TabsTrigger>
-              <TabsTrigger value="assignments">Assignments</TabsTrigger>
+          <Tabs defaultValue="marks">
+            <TabsList className="mb-4">
+              <TabsTrigger value="marks">Marks Sheet</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="midterm">
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <h3 className="text-lg font-medium">Mid-Term Examination</h3>
-                  <p className="text-sm text-muted-foreground">Maximum marks: 50</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="gap-1">
-                    <Upload className="h-4 w-4" /> Import
-                  </Button>
-                  <Button variant="outline" size="sm" className="gap-1">
-                    <Download className="h-4 w-4" /> Export
-                  </Button>
-                </div>
-              </div>
-              
+            <TabsContent value="marks">
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-3 font-medium">Roll No.</th>
-                      <th className="text-left p-3 font-medium">Student Name</th>
-                      <th className="text-left p-3 font-medium">Obtained Marks</th>
-                      <th className="text-left p-3 font-medium">Percentage</th>
-                      <th className="text-left p-3 font-medium">Grade</th>
-                      <th className="text-left p-3 font-medium">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      { id: 1, rollNo: "10A01", name: "Alice Johnson", marks: 42, status: "Entered" },
-                      { id: 2, rollNo: "10A02", name: "Bob Smith", marks: 38, status: "Entered" },
-                      { id: 3, rollNo: "10A03", name: "Charlie Brown", marks: 29, status: "Entered" },
-                      { id: 4, rollNo: "10A04", name: "Diana Miller", marks: 45, status: "Entered" },
-                      { id: 5, rollNo: "10A05", name: "Edward Wilson", marks: "", status: "Pending" },
-                    ].map((student) => {
-                      const percentage = student.marks ? (parseInt(student.marks as string) / 50) * 100 : 0;
-                      let grade = "F";
-                      if (percentage >= 90) grade = "A+";
-                      else if (percentage >= 80) grade = "A";
-                      else if (percentage >= 70) grade = "B+";
-                      else if (percentage >= 60) grade = "B";
-                      else if (percentage >= 50) grade = "C";
-                      else if (percentage >= 40) grade = "D";
-                      
-                      return (
-                        <tr key={student.id} className="border-b hover:bg-muted/30">
-                          <td className="p-3">{student.rollNo}</td>
-                          <td className="p-3">{student.name}</td>
-                          <td className="p-3">
-                            <Input
-                              type="number"
-                              min="0"
-                              max="50"
-                              defaultValue={student.marks}
-                              className="w-24"
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Student Name</TableHead>
+                      <TableHead>Mid-Term</TableHead>
+                      <TableHead>Final Exam</TableHead>
+                      <TableHead>Assignments</TableHead>
+                      <TableHead>Practicals</TableHead>
+                      <TableHead>Average</TableHead>
+                      <TableHead>Grade</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredStudents.map((student) => (
+                      <TableRow key={student.id}>
+                        <TableCell className="font-medium">{student.name}</TableCell>
+                        <TableCell>
+                          {editingStudentId === student.id ? (
+                            <Input 
+                              type="number" 
+                              className="w-16" 
+                              value={editableMarks.midTerm} 
+                              onChange={(e) => setEditableMarks({...editableMarks, midTerm: parseInt(e.target.value) || 0})}
                             />
-                          </td>
-                          <td className="p-3">
-                            {student.marks ? `${percentage.toFixed(1)}%` : "-"}
-                          </td>
-                          <td className="p-3">
-                            {student.marks ? grade : "-"}
-                          </td>
-                          <td className="p-3">
-                            <Badge
-                              variant={student.status === "Entered" ? "default" : "secondary"}
-                            >
-                              {student.status}
-                            </Badge>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              
-              <div className="mt-6 text-right">
-                <Button variant="outline" className="mr-2">Cancel</Button>
-                <Button onClick={handleSaveMarks} className="gap-1">
-                  <Save className="h-4 w-4" /> Save Marks
-                </Button>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="final">
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <h3 className="text-lg font-medium">Final Examination</h3>
-                  <p className="text-sm text-muted-foreground">Maximum marks: 100</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="gap-1">
-                    <Upload className="h-4 w-4" /> Import
-                  </Button>
-                  <Button variant="outline" size="sm" className="gap-1">
-                    <Download className="h-4 w-4" /> Export
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-3 font-medium">Roll No.</th>
-                      <th className="text-left p-3 font-medium">Student Name</th>
-                      <th className="text-left p-3 font-medium">Obtained Marks</th>
-                      <th className="text-left p-3 font-medium">Percentage</th>
-                      <th className="text-left p-3 font-medium">Grade</th>
-                      <th className="text-left p-3 font-medium">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      { id: 1, rollNo: "10A01", name: "Alice Johnson", marks: "", status: "Upcoming" },
-                      { id: 2, rollNo: "10A02", name: "Bob Smith", marks: "", status: "Upcoming" },
-                      { id: 3, rollNo: "10A03", name: "Charlie Brown", marks: "", status: "Upcoming" },
-                      { id: 4, rollNo: "10A04", name: "Diana Miller", marks: "", status: "Upcoming" },
-                      { id: 5, rollNo: "10A05", name: "Edward Wilson", marks: "", status: "Upcoming" },
-                    ].map((student) => (
-                      <tr key={student.id} className="border-b hover:bg-muted/30">
-                        <td className="p-3">{student.rollNo}</td>
-                        <td className="p-3">{student.name}</td>
-                        <td className="p-3">
-                          <Input
-                            type="number"
-                            min="0"
-                            max="100"
-                            defaultValue={student.marks}
-                            className="w-24"
-                            disabled={student.status === "Upcoming"}
-                          />
-                        </td>
-                        <td className="p-3">-</td>
-                        <td className="p-3">-</td>
-                        <td className="p-3">
-                          <Badge variant="secondary">
-                            {student.status}
+                          ) : (
+                            <span>{student.midTermMarks}</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {editingStudentId === student.id ? (
+                            <Input 
+                              type="number" 
+                              className="w-16" 
+                              value={editableMarks.final} 
+                              onChange={(e) => setEditableMarks({...editableMarks, final: parseInt(e.target.value) || 0})}
+                            />
+                          ) : (
+                            <span>{student.finalMarks}</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {editingStudentId === student.id ? (
+                            <Input 
+                              type="number" 
+                              className="w-16" 
+                              value={editableMarks.assignment} 
+                              onChange={(e) => setEditableMarks({...editableMarks, assignment: parseInt(e.target.value) || 0})}
+                            />
+                          ) : (
+                            <span>{student.assignments}</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {editingStudentId === student.id ? (
+                            <Input 
+                              type="number" 
+                              className="w-16" 
+                              value={editableMarks.practical} 
+                              onChange={(e) => setEditableMarks({...editableMarks, practical: parseInt(e.target.value) || 0})}
+                            />
+                          ) : (
+                            <span>{student.practicals}</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {calculateTotal(student).toFixed(1)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={getBadgeVariant(calculateTotal(student))}>
+                            {getGrade(calculateTotal(student))}
                           </Badge>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="practicals">
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <h3 className="text-lg font-medium">Practical Assessments</h3>
-                  <p className="text-sm text-muted-foreground">Maximum marks: 30</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="gap-1">
-                    <Upload className="h-4 w-4" /> Import
-                  </Button>
-                  <Button variant="outline" size="sm" className="gap-1">
-                    <Download className="h-4 w-4" /> Export
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-3 font-medium">Roll No.</th>
-                      <th className="text-left p-3 font-medium">Student Name</th>
-                      <th className="text-left p-3 font-medium">Obtained Marks</th>
-                      <th className="text-left p-3 font-medium">Percentage</th>
-                      <th className="text-left p-3 font-medium">Grade</th>
-                      <th className="text-left p-3 font-medium">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      { id: 1, rollNo: "10A01", name: "Alice Johnson", marks: 28, status: "Entered" },
-                      { id: 2, rollNo: "10A02", name: "Bob Smith", marks: 25, status: "Entered" },
-                      { id: 3, rollNo: "10A03", name: "Charlie Brown", marks: 20, status: "Entered" },
-                      { id: 4, rollNo: "10A04", name: "Diana Miller", marks: 29, status: "Entered" },
-                      { id: 5, rollNo: "10A05", name: "Edward Wilson", marks: 24, status: "Entered" },
-                    ].map((student) => {
-                      const percentage = (parseInt(student.marks as string) / 30) * 100;
-                      let grade = "F";
-                      if (percentage >= 90) grade = "A+";
-                      else if (percentage >= 80) grade = "A";
-                      else if (percentage >= 70) grade = "B+";
-                      else if (percentage >= 60) grade = "B";
-                      else if (percentage >= 50) grade = "C";
-                      else if (percentage >= 40) grade = "D";
-                      
-                      return (
-                        <tr key={student.id} className="border-b hover:bg-muted/30">
-                          <td className="p-3">{student.rollNo}</td>
-                          <td className="p-3">{student.name}</td>
-                          <td className="p-3">
-                            <Input
-                              type="number"
-                              min="0"
-                              max="30"
-                              defaultValue={student.marks}
-                              className="w-24"
-                            />
-                          </td>
-                          <td className="p-3">{percentage.toFixed(1)}%</td>
-                          <td className="p-3">{grade}</td>
-                          <td className="p-3">
-                            <Badge variant="default">
-                              {student.status}
-                            </Badge>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              
-              <div className="mt-6 text-right">
-                <Button variant="outline" className="mr-2">Cancel</Button>
-                <Button onClick={handleSaveMarks} className="gap-1">
-                  <Save className="h-4 w-4" /> Save Marks
-                </Button>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="assignments">
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <h3 className="text-lg font-medium">Assignments</h3>
-                  <p className="text-sm text-muted-foreground">Maximum marks: 20</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="gap-1">
-                    <Upload className="h-4 w-4" /> Import
-                  </Button>
-                  <Button variant="outline" size="sm" className="gap-1">
-                    <Download className="h-4 w-4" /> Export
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-3 font-medium">Roll No.</th>
-                      <th className="text-left p-3 font-medium">Student Name</th>
-                      <th className="text-left p-3 font-medium">Assignment 1</th>
-                      <th className="text-left p-3 font-medium">Assignment 2</th>
-                      <th className="text-left p-3 font-medium">Total</th>
-                      <th className="text-left p-3 font-medium">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      { id: 1, rollNo: "10A01", name: "Alice Johnson", assign1: 9, assign2: 10, status: "Complete" },
-                      { id: 2, rollNo: "10A02", name: "Bob Smith", assign1: 8, assign2: 9, status: "Complete" },
-                      { id: 3, rollNo: "10A03", name: "Charlie Brown", assign1: 7, assign2: 8, status: "Complete" },
-                      { id: 4, rollNo: "10A04", name: "Diana Miller", assign1: 10, assign2: 9, status: "Complete" },
-                      { id: 5, rollNo: "10A05", name: "Edward Wilson", assign1: 8, assign2: "", status: "Partial" },
-                    ].map((student) => {
-                      const total = (student.assign1 || 0) + (student.assign2 || 0);
-                      
-                      return (
-                        <tr key={student.id} className="border-b hover:bg-muted/30">
-                          <td className="p-3">{student.rollNo}</td>
-                          <td className="p-3">{student.name}</td>
-                          <td className="p-3">
-                            <Input
-                              type="number"
-                              min="0"
-                              max="10"
-                              defaultValue={student.assign1}
-                              className="w-20"
-                            />
-                          </td>
-                          <td className="p-3">
-                            <Input
-                              type="number"
-                              min="0"
-                              max="10"
-                              defaultValue={student.assign2}
-                              className="w-20"
-                            />
-                          </td>
-                          <td className="p-3">{total}/20</td>
-                          <td className="p-3">
-                            <Badge
-                              variant={student.status === "Complete" ? "default" : "secondary"}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {editingStudentId === student.id ? (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={handleSaveMarks}
                             >
-                              {student.status}
-                            </Badge>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                              <Save className="h-4 w-4 mr-1" /> Save
+                            </Button>
+                          ) : (
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => handleEditStudent(student)}
+                            >
+                              <Edit className="h-4 w-4 mr-1" /> Edit
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
-              
-              <div className="mt-6 text-right">
-                <Button variant="outline" className="mr-2">Cancel</Button>
-                <Button onClick={handleSaveMarks} className="gap-1">
-                  <Save className="h-4 w-4" /> Save Marks
-                </Button>
+            </TabsContent>
+            
+            <TabsContent value="analytics">
+              <div className="grid gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Performance Distribution</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">
+                        Analytics charts would be displayed here, showing the performance distribution
+                        for the selected class.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </TabsContent>
           </Tabs>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Class Performance Summary</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="border rounded-lg p-4 text-center">
-              <p className="text-sm text-muted-foreground mb-1">Class Average</p>
-              <p className="text-3xl font-bold text-primary">76%</p>
-              <div className="mt-2 flex justify-center">
-                <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Grade B+</Badge>
-              </div>
-            </div>
-            
-            <div className="border rounded-lg p-4 text-center">
-              <p className="text-sm text-muted-foreground mb-1">Highest Score</p>
-              <p className="text-3xl font-bold text-green-600">95%</p>
-              <div className="mt-2 flex justify-center">
-                <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Alice Johnson</Badge>
-              </div>
-            </div>
-            
-            <div className="border rounded-lg p-4 text-center">
-              <p className="text-sm text-muted-foreground mb-1">Students Below Passing</p>
-              <p className="text-3xl font-bold text-amber-600">2</p>
-              <div className="mt-2 flex justify-center">
-                <Badge variant="outline" className="bg-amber-50">Need Attention</Badge>
-              </div>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </DashboardLayout>

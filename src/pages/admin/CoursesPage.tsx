@@ -72,7 +72,7 @@ export default function CoursesPage() {
                         <Badge
                           variant={
                             course.completed === course.total 
-                              ? "success" 
+                              ? "secondary" 
                               : course.completed > course.total / 2 
                                 ? "default" 
                                 : "secondary"
@@ -143,7 +143,7 @@ export default function CoursesPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge variant="success">Completed</Badge>
+                        <Badge variant="secondary">Completed</Badge>
                         <Button variant="outline" size="sm">View Details</Button>
                       </div>
                     </div>
