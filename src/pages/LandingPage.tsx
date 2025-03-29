@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { GraduationCap, Shield, ChalkboardTeacher, BookOpen } from "lucide-react";
+import { GraduationCap, Shield, BookOpen } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
 export default function LandingPage() {
@@ -75,7 +75,7 @@ export default function LandingPage() {
           <Card className="bg-white hover:shadow-lg transition-shadow">
             <CardHeader className="text-center">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                <ChalkboardTeacher className="w-8 h-8 text-primary" />
+                <BookOpen className="w-8 h-8 text-primary" />
               </div>
               <CardTitle>Teacher</CardTitle>
               <CardDescription>Teaching portal</CardDescription>
