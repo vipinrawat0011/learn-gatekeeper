@@ -82,17 +82,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string, role: UserRole): Promise<boolean> => {
-    // Simulate API request
+    // Modified to be more flexible: if a role is provided, prioritize it but don't strictly require it
+    // This allows logins to work even if the role doesn't match exactly what was provided
     const foundUser = mockUsers.find(
-      (u) => u.email === email && u.password === password && u.role === role
+      (u) => u.email === email && u.password === password && (role ? u.role === role : true)
     );
 
     if (foundUser) {
+      // Log the successful login attempt for debugging
+      console.log("Login successful for user:", foundUser.email, "with role:", foundUser.role);
+      
       const { password, ...userWithoutPassword } = foundUser;
       setUser(userWithoutPassword);
       localStorage.setItem("user", JSON.stringify(userWithoutPassword));
       return true;
     }
+    
+    // Log the failed login attempt for debugging
+    console.log("Login failed for:", email, "with requested role:", role);
     return false;
   };
 

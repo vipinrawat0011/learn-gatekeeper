@@ -21,6 +21,7 @@ export default function AdminLogin() {
     setIsLoading(true);
     
     try {
+      console.log("Attempting admin login with:", email);
       const success = await login(email, password, "admin");
       
       if (success) {
@@ -37,6 +38,7 @@ export default function AdminLogin() {
         });
       }
     } catch (error) {
+      console.error("Login error:", error);
       toast({
         title: "Error",
         description: "An error occurred. Please try again.",

@@ -21,6 +21,7 @@ export default function TeacherLogin() {
     setIsLoading(true);
     
     try {
+      console.log("Attempting teacher login with:", email);
       const success = await login(email, password, "teacher");
       
       if (success) {
@@ -37,6 +38,7 @@ export default function TeacherLogin() {
         });
       }
     } catch (error) {
+      console.error("Login error:", error);
       toast({
         title: "Error",
         description: "An error occurred. Please try again.",
