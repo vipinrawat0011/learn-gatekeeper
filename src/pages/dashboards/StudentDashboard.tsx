@@ -161,63 +161,64 @@ export default function StudentDashboard() {
       
       <Card className="mb-8">
         <CardHeader className="pb-0">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="recent-courses">Recent Courses</TabsTrigger>
               <TabsTrigger value="todays-schedule">Today's Schedule</TabsTrigger>
             </TabsList>
+            <TabsContent value="recent-courses" className="mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {recentCourses.map((course) => (
+                  <Card key={course.id} className="overflow-hidden">
+                    <div className="p-6">
+                      <h3 className="font-medium text-lg mb-1">{course.title}</h3>
+                      <p className="text-sm text-muted-foreground mb-4">Instructor: {course.instructor}</p>
+                      
+                      <div className="space-y-1 mb-4">
+                        <div className="flex justify-between text-sm">
+                          <span>Progress</span>
+                          <span className="font-medium">{course.progress}%</span>
+                        </div>
+                        <Progress value={course.progress} className="h-2" />
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <div className="text-xs text-muted-foreground">
+                          Last accessed: {course.lastAccessed}
+                        </div>
+                        <Button>Continue</Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="todays-schedule" className="mt-6">
+              <div className="space-y-4">
+                {[
+                  { time: "9:00 AM - 10:30 AM", subject: "Mathematics", room: "Room 201", teacher: "Dr. Smith" },
+                  { time: "11:00 AM - 12:30 PM", subject: "Physics", room: "Lab 102", teacher: "Prof. Johnson" },
+                  { time: "2:00 PM - 3:30 PM", subject: "English", room: "Room 305", teacher: "Ms. Williams" },
+                ].map((class_, index) => (
+                  <div key={index} className="flex border-b pb-4">
+                    <div className="w-36 font-medium">{class_.time}</div>
+                    <div className="flex-1">
+                      <div className="font-medium">{class_.subject}</div>
+                      <div className="text-sm text-muted-foreground">{class_.room}</div>
+                      <div className="text-sm text-muted-foreground">Teacher: {class_.teacher}</div>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      View Materials
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
           </Tabs>
         </CardHeader>
         <CardContent className="pt-6">
-          <TabsContent value="recent-courses" className="m-0">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {recentCourses.map((course) => (
-                <Card key={course.id} className="overflow-hidden">
-                  <div className="p-6">
-                    <h3 className="font-medium text-lg mb-1">{course.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-4">Instructor: {course.instructor}</p>
-                    
-                    <div className="space-y-1 mb-4">
-                      <div className="flex justify-between text-sm">
-                        <span>Progress</span>
-                        <span className="font-medium">{course.progress}%</span>
-                      </div>
-                      <Progress value={course.progress} className="h-2" />
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <div className="text-xs text-muted-foreground">
-                        Last accessed: {course.lastAccessed}
-                      </div>
-                      <Button>Continue</Button>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="todays-schedule" className="m-0">
-            <div className="space-y-4">
-              {[
-                { time: "9:00 AM - 10:30 AM", subject: "Mathematics", room: "Room 201", teacher: "Dr. Smith" },
-                { time: "11:00 AM - 12:30 PM", subject: "Physics", room: "Lab 102", teacher: "Prof. Johnson" },
-                { time: "2:00 PM - 3:30 PM", subject: "English", room: "Room 305", teacher: "Ms. Williams" },
-              ].map((class_, index) => (
-                <div key={index} className="flex border-b pb-4">
-                  <div className="w-36 font-medium">{class_.time}</div>
-                  <div className="flex-1">
-                    <div className="font-medium">{class_.subject}</div>
-                    <div className="text-sm text-muted-foreground">{class_.room}</div>
-                    <div className="text-sm text-muted-foreground">Teacher: {class_.teacher}</div>
-                  </div>
-                  <Button variant="outline" size="sm">
-                    View Materials
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </TabsContent>
+          {/* Content now handled by Tabs component above */}
         </CardContent>
       </Card>
       
