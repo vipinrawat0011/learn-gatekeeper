@@ -31,6 +31,7 @@ import CoursesPage from "./pages/admin/CoursesPage";
 import ApprovalPage from "./pages/admin/ApprovalPage";
 import StudentManagementPage from "./pages/admin/StudentManagementPage";
 import ProgressTrackingPage from "./pages/admin/ProgressTrackingPage";
+import ClassroomPage from "./pages/admin/ClassroomPage";
 
 // Teacher Pages
 import StudentPerformancePage from "./pages/teacher/StudentPerformancePage";
@@ -80,6 +81,7 @@ const App = () => (
           <Route path="/admin/approvals" element={<ApprovalPage />} />
           <Route path="/admin/student-management" element={<StudentManagementPage />} />
           <Route path="/admin/progress-tracking" element={<ProgressTrackingPage />} />
+          <Route path="/admin/classroom" element={<ClassroomPage />} />
           
           {/* Teacher Routes */}
           <Route path="/teacher/student-performance" element={<StudentPerformancePage />} />

@@ -115,6 +115,12 @@ export function Sidebar({ role }: SidebarProps) {
                 active={path === "/admin/user-management"} 
               />
               <NavLink 
+                href="/admin/classroom" 
+                icon={GraduationCap} 
+                label="Classroom" 
+                active={path === "/admin/classroom"} 
+              />
+              <NavLink 
                 href="/admin/courses" 
                 icon={BookOpen} 
                 label="Courses" 
@@ -128,7 +134,7 @@ export function Sidebar({ role }: SidebarProps) {
               />
               <NavLink 
                 href="/admin/student-management" 
-                icon={GraduationCap} 
+                icon={Users} 
                 label="Student Management" 
                 active={path === "/admin/student-management"} 
               />
