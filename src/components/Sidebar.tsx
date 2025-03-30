@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -75,7 +74,7 @@ export function Sidebar({ role }: SidebarProps) {
 
       <div className="flex-1 overflow-auto py-2">
         <div className="px-3 py-2">
-          <h3 className="mb-2 px-4 text-xs font-semibold text-muted-foreground">Menu</h3>
+          <h3 className="mb-2 px-4 text-xs font-semibold text-muted-foreground">MENU</h3>
           
           {role === "superadmin" && (
             <>
@@ -156,16 +155,28 @@ export function Sidebar({ role }: SidebarProps) {
                 active={path === "/teacher/dashboard"} 
               />
               <NavLink 
+                href="/teacher/my-classroom" 
+                icon={Users} 
+                label="My Classroom" 
+                active={path === "/teacher/my-classroom"} 
+              />
+              <NavLink 
+                href="/teacher/subject" 
+                icon={BookOpen} 
+                label="Subject" 
+                active={path === "/teacher/subject"} 
+              />
+              <NavLink 
                 href="/teacher/student-performance" 
                 icon={LineChart} 
                 label="Student Performance" 
                 active={path === "/teacher/student-performance"} 
               />
               <NavLink 
-                href="/teacher/study-material" 
-                icon={FileText} 
-                label="Study Material" 
-                active={path === "/teacher/study-material"} 
+                href="/teacher/courses" 
+                icon={GraduationCap} 
+                label="Courses" 
+                active={path === "/teacher/courses"} 
               />
               <NavLink 
                 href="/teacher/assessments" 
@@ -174,16 +185,16 @@ export function Sidebar({ role }: SidebarProps) {
                 active={path === "/teacher/assessments"} 
               />
               <NavLink 
+                href="/teacher/schedule" 
+                icon={Calendar} 
+                label="Schedule" 
+                active={path === "/teacher/schedule"} 
+              />
+              <NavLink 
                 href="/teacher/marks" 
                 icon={ScrollText} 
                 label="Marks" 
                 active={path === "/teacher/marks"} 
-              />
-              <NavLink 
-                href="/teacher/profile" 
-                icon={User} 
-                label="Profile" 
-                active={path === "/teacher/profile"} 
               />
             </>
           )}
@@ -233,12 +244,12 @@ export function Sidebar({ role }: SidebarProps) {
 
       <div className="p-4 border-t">
         <div className="px-3 py-2">
-          <h3 className="mb-2 px-4 text-xs font-semibold text-muted-foreground">Settings</h3>
+          <h3 className="mb-2 px-4 text-xs font-semibold text-muted-foreground">SETTINGS</h3>
           {(role === "superadmin" || role === "admin" || role === "teacher" || role === "student") && (
             <NavLink href="/profile" icon={User} label="Profile" active={path === "/profile"} />
           )}
           
-          {(role === "superadmin" || role === "admin") && (
+          {(role === "superadmin" || role === "admin" || role === "teacher") && (
             <NavLink href="/settings" icon={Settings} label="Settings" active={path === "/settings"} />
           )}
           

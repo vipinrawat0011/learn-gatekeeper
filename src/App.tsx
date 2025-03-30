@@ -34,11 +34,15 @@ import ProgressTrackingPage from "./pages/admin/ProgressTrackingPage";
 import ClassroomPage from "./pages/admin/ClassroomPage";
 
 // Teacher Pages
+import MyClassroomPage from "./pages/teacher/MyClassroomPage";
+import SubjectPage from "./pages/teacher/SubjectPage";
 import StudentPerformancePage from "./pages/teacher/StudentPerformancePage";
 import StudyMaterialPage from "./pages/teacher/StudyMaterialPage";
 import AssessmentsPage from "./pages/teacher/AssessmentsPage";
 import MarksPage from "./pages/teacher/MarksPage";
 import TeacherProfilePage from "./pages/teacher/ProfilePage";
+import SchedulePage from "./pages/teacher/SchedulePage";
+import TeacherCoursesPage from "./pages/teacher/CoursesPage";
 
 // Student Pages
 import StudentCoursesPage from "./pages/student/CoursesPage";
@@ -84,11 +88,17 @@ const App = () => (
           <Route path="/admin/classroom" element={<ClassroomPage />} />
           
           {/* Teacher Routes */}
+          <Route path="/teacher/my-classroom" element={<MyClassroomPage />} />
+          <Route path="/teacher/subject" element={<SubjectPage />} />
           <Route path="/teacher/student-performance" element={<StudentPerformancePage />} />
+          <Route path="/teacher/courses" element={<TeacherCoursesPage />} />
           <Route path="/teacher/study-material" element={<StudyMaterialPage />} />
           <Route path="/teacher/assessments" element={<AssessmentsPage />} />
+          <Route path="/teacher/schedule" element={<SchedulePage />} />
           <Route path="/teacher/marks" element={<MarksPage />} />
           <Route path="/teacher/profile" element={<TeacherProfilePage />} />
+          <Route path="/profile" element={<TeacherProfilePage />} />
+          <Route path="/settings" element={<TeacherProfilePage />} />
           
           {/* Student Routes */}
           <Route path="/student/courses" element={<StudentCoursesPage />} />
