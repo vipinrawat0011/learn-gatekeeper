@@ -11,6 +11,8 @@ export interface AdminPermissions {
   studentClassification: boolean;
   aiLearning: boolean;
   systemStatus: boolean;
+  classroom: boolean;
+  progressTracking: boolean;
 }
 
 export interface TeacherPermissions {
@@ -18,12 +20,24 @@ export interface TeacherPermissions {
   studyMaterials: boolean;
   students: boolean;
   exams: boolean;
+  myClassroom: boolean;
+  studentPerformance: boolean;
+  courses: boolean;
+  assessments: boolean;
+  schedule: boolean;
+  marks: boolean;
+  profile: boolean;
+  subject: boolean;
 }
 
 export interface StudentPermissions {
   dashboard: boolean;
   progress: boolean;
   upcomingTests: boolean;
+  courses: boolean;
+  studyMaterial: boolean;
+  aiAssistant: boolean;
+  marks: boolean;
 }
 
 interface InstitutionPermissions {
@@ -56,6 +70,8 @@ const defaultAdminPermissions: AdminPermissions = {
   studentClassification: true,
   aiLearning: true,
   systemStatus: true,
+  classroom: true,
+  progressTracking: true,
 };
 
 const defaultTeacherPermissions: TeacherPermissions = {
@@ -63,12 +79,24 @@ const defaultTeacherPermissions: TeacherPermissions = {
   studyMaterials: true,
   students: true,
   exams: true,
+  myClassroom: true,
+  studentPerformance: true,
+  courses: true,
+  assessments: true,
+  schedule: true,
+  marks: true,
+  profile: true,
+  subject: true
 };
 
 const defaultStudentPermissions: StudentPermissions = {
   dashboard: true,
   progress: true,
   upcomingTests: true,
+  courses: true,
+  studyMaterial: true,
+  aiAssistant: true,
+  marks: true
 };
 
 // Default institutions

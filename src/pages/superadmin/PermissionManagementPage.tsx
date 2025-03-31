@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Select, 
   SelectContent, 
@@ -30,7 +29,8 @@ import {
   ClipboardCheck,
   BrainCircuit,
   BarChart4,
-  Settings
+  Settings,
+  Calendar
 } from "lucide-react";
 
 export default function PermissionManagementPage() {
@@ -160,12 +160,25 @@ export default function PermissionManagementPage() {
                     <div className="bg-muted/30 p-4 rounded-lg">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h5 className="font-medium">User Section</h5>
+                          <h5 className="font-medium">User Management</h5>
                           <p className="text-sm text-muted-foreground">User Management functionality</p>
                         </div>
                         <Switch 
                           checked={adminPermissions.userManagement} 
                           onCheckedChange={(checked) => updateAdminPermission('userManagement', checked)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h5 className="font-medium">Classroom</h5>
+                          <p className="text-sm text-muted-foreground">Manage classrooms</p>
+                        </div>
+                        <Switch 
+                          checked={adminPermissions.classroom} 
+                          onCheckedChange={(checked) => updateAdminPermission('classroom', checked)}
                         />
                       </div>
                     </div>
@@ -199,12 +212,25 @@ export default function PermissionManagementPage() {
                     <div className="bg-muted/30 p-4 rounded-lg">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h5 className="font-medium">Student Classification</h5>
+                          <h5 className="font-medium">Student Management</h5>
                           <p className="text-sm text-muted-foreground">Manage student classification</p>
                         </div>
                         <Switch 
                           checked={adminPermissions.studentClassification} 
                           onCheckedChange={(checked) => updateAdminPermission('studentClassification', checked)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h5 className="font-medium">Progress Tracking</h5>
+                          <p className="text-sm text-muted-foreground">Track student progress</p>
+                        </div>
+                        <Switch 
+                          checked={adminPermissions.progressTracking} 
+                          onCheckedChange={(checked) => updateAdminPermission('progressTracking', checked)}
                         />
                       </div>
                     </div>
@@ -276,6 +302,97 @@ export default function PermissionManagementPage() {
                     <div className="bg-muted/30 p-4 rounded-lg">
                       <div className="flex items-center justify-between">
                         <div>
+                          <h5 className="font-medium">My Classroom</h5>
+                          <p className="text-sm text-muted-foreground">Manage classroom activities</p>
+                        </div>
+                        <Switch 
+                          checked={teacherPermissions.myClassroom} 
+                          onCheckedChange={(checked) => updateTeacherPermission('myClassroom', checked)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h5 className="font-medium">Subject</h5>
+                          <p className="text-sm text-muted-foreground">Manage subject materials</p>
+                        </div>
+                        <Switch 
+                          checked={teacherPermissions.subject} 
+                          onCheckedChange={(checked) => updateTeacherPermission('subject', checked)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h5 className="font-medium">Student Performance</h5>
+                          <p className="text-sm text-muted-foreground">View student performance</p>
+                        </div>
+                        <Switch 
+                          checked={teacherPermissions.studentPerformance} 
+                          onCheckedChange={(checked) => updateTeacherPermission('studentPerformance', checked)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h5 className="font-medium">Courses</h5>
+                          <p className="text-sm text-muted-foreground">Manage courses</p>
+                        </div>
+                        <Switch 
+                          checked={teacherPermissions.courses} 
+                          onCheckedChange={(checked) => updateTeacherPermission('courses', checked)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h5 className="font-medium">Assessments</h5>
+                          <p className="text-sm text-muted-foreground">Create and manage assessments</p>
+                        </div>
+                        <Switch 
+                          checked={teacherPermissions.assessments} 
+                          onCheckedChange={(checked) => updateTeacherPermission('assessments', checked)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h5 className="font-medium">Schedule</h5>
+                          <p className="text-sm text-muted-foreground">Manage schedule</p>
+                        </div>
+                        <Switch 
+                          checked={teacherPermissions.schedule} 
+                          onCheckedChange={(checked) => updateTeacherPermission('schedule', checked)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h5 className="font-medium">Marks</h5>
+                          <p className="text-sm text-muted-foreground">Manage student marks</p>
+                        </div>
+                        <Switch 
+                          checked={teacherPermissions.marks} 
+                          onCheckedChange={(checked) => updateTeacherPermission('marks', checked)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
                           <h5 className="font-medium">Study Materials</h5>
                           <p className="text-sm text-muted-foreground">Upload and manage study materials</p>
                         </div>
@@ -308,6 +425,19 @@ export default function PermissionManagementPage() {
                         <Switch 
                           checked={teacherPermissions.exams} 
                           onCheckedChange={(checked) => updateTeacherPermission('exams', checked)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h5 className="font-medium">Profile</h5>
+                          <p className="text-sm text-muted-foreground">Manage teacher profile</p>
+                        </div>
+                        <Switch 
+                          checked={teacherPermissions.profile} 
+                          onCheckedChange={(checked) => updateTeacherPermission('profile', checked)}
                         />
                       </div>
                     </div>
@@ -353,12 +483,12 @@ export default function PermissionManagementPage() {
                     <div className="bg-muted/30 p-4 rounded-lg">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h5 className="font-medium">Progress</h5>
-                          <p className="text-sm text-muted-foreground">View learning progress</p>
+                          <h5 className="font-medium">Courses</h5>
+                          <p className="text-sm text-muted-foreground">Access to courses</p>
                         </div>
                         <Switch 
-                          checked={studentPermissions.progress} 
-                          onCheckedChange={(checked) => updateStudentPermission('progress', checked)}
+                          checked={studentPermissions.courses} 
+                          onCheckedChange={(checked) => updateStudentPermission('courses', checked)}
                         />
                       </div>
                     </div>
@@ -366,12 +496,64 @@ export default function PermissionManagementPage() {
                     <div className="bg-muted/30 p-4 rounded-lg">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h5 className="font-medium">Upcoming Tests</h5>
+                          <h5 className="font-medium">Examination</h5>
                           <p className="text-sm text-muted-foreground">View upcoming examinations</p>
                         </div>
                         <Switch 
                           checked={studentPermissions.upcomingTests} 
                           onCheckedChange={(checked) => updateStudentPermission('upcomingTests', checked)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h5 className="font-medium">Marks</h5>
+                          <p className="text-sm text-muted-foreground">View marks and grades</p>
+                        </div>
+                        <Switch 
+                          checked={studentPermissions.marks} 
+                          onCheckedChange={(checked) => updateStudentPermission('marks', checked)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h5 className="font-medium">Study Material</h5>
+                          <p className="text-sm text-muted-foreground">Access study materials</p>
+                        </div>
+                        <Switch 
+                          checked={studentPermissions.studyMaterial} 
+                          onCheckedChange={(checked) => updateStudentPermission('studyMaterial', checked)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h5 className="font-medium">AI Learning Assistant</h5>
+                          <p className="text-sm text-muted-foreground">Access AI learning assistant</p>
+                        </div>
+                        <Switch 
+                          checked={studentPermissions.aiAssistant} 
+                          onCheckedChange={(checked) => updateStudentPermission('aiAssistant', checked)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h5 className="font-medium">Progress</h5>
+                          <p className="text-sm text-muted-foreground">View learning progress</p>
+                        </div>
+                        <Switch 
+                          checked={studentPermissions.progress} 
+                          onCheckedChange={(checked) => updateStudentPermission('progress', checked)}
                         />
                       </div>
                     </div>
@@ -396,8 +578,16 @@ export default function PermissionManagementPage() {
                 </h3>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">User Section</span>
+                    <span className="text-sm">User Management</span>
                     {adminPermissions.userManagement ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <span className="h-4 w-4 block"></span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Classroom</span>
+                    {adminPermissions.classroom ? (
                       <Check className="h-4 w-4 text-green-500" />
                     ) : (
                       <span className="h-4 w-4 block"></span>
@@ -420,7 +610,7 @@ export default function PermissionManagementPage() {
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Student Classification</span>
+                    <span className="text-sm">Student Management</span>
                     {adminPermissions.studentClassification ? (
                       <Check className="h-4 w-4 text-green-500" />
                     ) : (
@@ -428,16 +618,8 @@ export default function PermissionManagementPage() {
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">AI Learning</span>
-                    {adminPermissions.aiLearning ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <span className="h-4 w-4 block"></span>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">System Status</span>
-                    {adminPermissions.systemStatus ? (
+                    <span className="text-sm">Progress Tracking</span>
+                    {adminPermissions.progressTracking ? (
                       <Check className="h-4 w-4 text-green-500" />
                     ) : (
                       <span className="h-4 w-4 block"></span>
@@ -453,24 +635,48 @@ export default function PermissionManagementPage() {
                 </h3>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Study Materials</span>
-                    {teacherPermissions.studyMaterials ? (
+                    <span className="text-sm">My Classroom</span>
+                    {teacherPermissions.myClassroom ? (
                       <Check className="h-4 w-4 text-green-500" />
                     ) : (
                       <span className="h-4 w-4 block"></span>
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Students</span>
-                    {teacherPermissions.students ? (
+                    <span className="text-sm">Subject</span>
+                    {teacherPermissions.subject ? (
                       <Check className="h-4 w-4 text-green-500" />
                     ) : (
                       <span className="h-4 w-4 block"></span>
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Exams</span>
-                    {teacherPermissions.exams ? (
+                    <span className="text-sm">Student Performance</span>
+                    {teacherPermissions.studentPerformance ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <span className="h-4 w-4 block"></span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Courses</span>
+                    {teacherPermissions.courses ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <span className="h-4 w-4 block"></span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Assessments</span>
+                    {teacherPermissions.assessments ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <span className="h-4 w-4 block"></span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Marks</span>
+                    {teacherPermissions.marks ? (
                       <Check className="h-4 w-4 text-green-500" />
                     ) : (
                       <span className="h-4 w-4 block"></span>
@@ -486,16 +692,40 @@ export default function PermissionManagementPage() {
                 </h3>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Progress</span>
-                    {studentPermissions.progress ? (
+                    <span className="text-sm">Courses</span>
+                    {studentPermissions.courses ? (
                       <Check className="h-4 w-4 text-green-500" />
                     ) : (
                       <span className="h-4 w-4 block"></span>
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Upcoming Tests</span>
+                    <span className="text-sm">Examination</span>
                     {studentPermissions.upcomingTests ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <span className="h-4 w-4 block"></span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Marks</span>
+                    {studentPermissions.marks ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <span className="h-4 w-4 block"></span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Study Material</span>
+                    {studentPermissions.studyMaterial ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <span className="h-4 w-4 block"></span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">AI Assistant</span>
+                    {studentPermissions.aiAssistant ? (
                       <Check className="h-4 w-4 text-green-500" />
                     ) : (
                       <span className="h-4 w-4 block"></span>

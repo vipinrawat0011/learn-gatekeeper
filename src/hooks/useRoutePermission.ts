@@ -21,8 +21,8 @@ export const useRoutePermission = () => {
       if (path === "/admin/courses") return hasPermission("admin", "contentReview");
       if (path === "/admin/approvals") return hasPermission("admin", "approvals");
       if (path === "/admin/student-management") return hasPermission("admin", "studentClassification");
-      if (path === "/admin/progress-tracking") return hasPermission("admin", "studentClassification");
-      if (path === "/admin/classroom") return hasPermission("admin", "userManagement");
+      if (path === "/admin/progress-tracking") return hasPermission("admin", "progressTracking");
+      if (path === "/admin/classroom") return hasPermission("admin", "classroom");
       
       // Default case - deny access for admin if no specific rule matches
       return false;
@@ -32,15 +32,15 @@ export const useRoutePermission = () => {
     if (user.role === "teacher") {
       // Check permissions for all teacher routes
       if (path === "/teacher/dashboard") return hasPermission("teacher", "dashboard");
-      if (path === "/teacher/my-classroom") return hasPermission("teacher", "students");
-      if (path === "/teacher/subject") return hasPermission("teacher", "studyMaterials");
-      if (path === "/teacher/student-performance") return hasPermission("teacher", "students");
-      if (path === "/teacher/courses") return hasPermission("teacher", "studyMaterials");
-      if (path === "/teacher/assessments") return hasPermission("teacher", "exams");
+      if (path === "/teacher/my-classroom") return hasPermission("teacher", "myClassroom");
+      if (path === "/teacher/subject") return hasPermission("teacher", "subject");
+      if (path === "/teacher/student-performance") return hasPermission("teacher", "studentPerformance");
+      if (path === "/teacher/courses") return hasPermission("teacher", "courses");
+      if (path === "/teacher/assessments") return hasPermission("teacher", "assessments");
       if (path === "/teacher/study-material") return hasPermission("teacher", "studyMaterials");
-      if (path === "/teacher/marks") return hasPermission("teacher", "exams");
-      if (path === "/teacher/schedule") return hasPermission("teacher", "dashboard");
-      if (path === "/teacher/profile") return hasPermission("teacher", "dashboard");
+      if (path === "/teacher/marks") return hasPermission("teacher", "marks");
+      if (path === "/teacher/schedule") return hasPermission("teacher", "schedule");
+      if (path === "/teacher/profile") return hasPermission("teacher", "profile");
       
       // Default case - deny access for teacher if no specific rule matches
       return false;
@@ -50,10 +50,10 @@ export const useRoutePermission = () => {
     if (user.role === "student") {
       if (path === "/student/dashboard") return hasPermission("student", "dashboard");
       if (path === "/student/examination") return hasPermission("student", "upcomingTests");
-      if (path === "/student/marks") return hasPermission("student", "progress");
-      if (path === "/student/courses") return hasPermission("student", "dashboard");
-      if (path === "/student/study-material") return hasPermission("student", "dashboard");
-      if (path === "/student/ai-assistant") return hasPermission("student", "dashboard");
+      if (path === "/student/marks") return hasPermission("student", "marks");
+      if (path === "/student/courses") return hasPermission("student", "courses");
+      if (path === "/student/study-material") return hasPermission("student", "studyMaterial");
+      if (path === "/student/ai-assistant") return hasPermission("student", "aiAssistant");
       
       // Default case - deny access for student if no specific rule matches
       return false;
