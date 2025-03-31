@@ -26,6 +26,14 @@ export interface StudentPermissions {
   upcomingTests: boolean;
 }
 
+interface InstitutionPermissions {
+  [institute: string]: {
+    adminPermissions: AdminPermissions;
+    teacherPermissions: TeacherPermissions;
+    studentPermissions: StudentPermissions;
+  }
+}
+
 interface PermissionContextType {
   adminPermissions: AdminPermissions;
   teacherPermissions: TeacherPermissions;
@@ -35,6 +43,9 @@ interface PermissionContextType {
   updateStudentPermission: (key: keyof StudentPermissions, value: boolean) => void;
   savePermissions: () => void;
   hasPermission: (role: string, permission: string) => boolean;
+  selectedInstitute: string;
+  setSelectedInstitute: (institute: string) => void;
+  allInstitutions: string[];
 }
 
 const defaultAdminPermissions: AdminPermissions = {
@@ -60,6 +71,9 @@ const defaultStudentPermissions: StudentPermissions = {
   upcomingTests: true,
 };
 
+// Default institutions
+const defaultInstitutions = ["City School", "Valley Academy", "Tech Institute", "Global Academy"];
+
 const PermissionContext = createContext<PermissionContextType>({
   adminPermissions: defaultAdminPermissions,
   teacherPermissions: defaultTeacherPermissions,
@@ -69,65 +83,133 @@ const PermissionContext = createContext<PermissionContextType>({
   updateStudentPermission: () => {},
   savePermissions: () => {},
   hasPermission: () => true,
+  selectedInstitute: "City School",
+  setSelectedInstitute: () => {},
+  allInstitutions: defaultInstitutions,
 });
 
 export const usePermissions = () => useContext(PermissionContext);
 
 export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [adminPermissions, setAdminPermissions] = useState<AdminPermissions>(defaultAdminPermissions);
-  const [teacherPermissions, setTeacherPermissions] = useState<TeacherPermissions>(defaultTeacherPermissions);
-  const [studentPermissions, setStudentPermissions] = useState<StudentPermissions>(defaultStudentPermissions);
+  const [selectedInstitute, setSelectedInstitute] = useState<string>("City School");
+  const [institutionPermissions, setInstitutionPermissions] = useState<InstitutionPermissions>({});
   const { user } = useAuth();
 
-  // Load saved permissions from localStorage on initial render
+  // Initialize all institutions with default permissions if not already in localStorage
   useEffect(() => {
-    const savedAdminPermissions = localStorage.getItem("adminPermissions");
-    const savedTeacherPermissions = localStorage.getItem("teacherPermissions");
-    const savedStudentPermissions = localStorage.getItem("studentPermissions");
+    const savedPermissions = localStorage.getItem("institutionPermissions");
+    
+    if (savedPermissions) {
+      setInstitutionPermissions(JSON.parse(savedPermissions));
+    } else {
+      // Initialize with default permissions for all institutions
+      const initialPermissions: InstitutionPermissions = {};
+      
+      defaultInstitutions.forEach(institute => {
+        initialPermissions[institute] = {
+          adminPermissions: { ...defaultAdminPermissions },
+          teacherPermissions: { ...defaultTeacherPermissions },
+          studentPermissions: { ...defaultStudentPermissions }
+        };
+      });
+      
+      setInstitutionPermissions(initialPermissions);
+      localStorage.setItem("institutionPermissions", JSON.stringify(initialPermissions));
+    }
+    
+    // If user is logged in and has an institute, select that institute
+    if (user?.institute && defaultInstitutions.includes(user.institute)) {
+      setSelectedInstitute(user.institute);
+    }
+  }, [user?.institute]);
 
-    if (savedAdminPermissions) {
-      setAdminPermissions(JSON.parse(savedAdminPermissions));
-    }
-    if (savedTeacherPermissions) {
-      setTeacherPermissions(JSON.parse(savedTeacherPermissions));
-    }
-    if (savedStudentPermissions) {
-      setStudentPermissions(JSON.parse(savedStudentPermissions));
-    }
-  }, []);
+  // Get current institute permissions or default if not set
+  const currentInstitutePermissions = institutionPermissions[selectedInstitute] || {
+    adminPermissions: defaultAdminPermissions,
+    teacherPermissions: defaultTeacherPermissions,
+    studentPermissions: defaultStudentPermissions
+  };
 
   const updateAdminPermission = (key: keyof AdminPermissions, value: boolean) => {
-    setAdminPermissions(prev => ({ ...prev, [key]: value }));
+    setInstitutionPermissions(prev => {
+      const updated = { ...prev };
+      if (!updated[selectedInstitute]) {
+        updated[selectedInstitute] = {
+          adminPermissions: { ...defaultAdminPermissions },
+          teacherPermissions: { ...defaultTeacherPermissions },
+          studentPermissions: { ...defaultStudentPermissions }
+        };
+      }
+      updated[selectedInstitute].adminPermissions = {
+        ...updated[selectedInstitute].adminPermissions,
+        [key]: value
+      };
+      return updated;
+    });
   };
 
   const updateTeacherPermission = (key: keyof TeacherPermissions, value: boolean) => {
-    setTeacherPermissions(prev => ({ ...prev, [key]: value }));
+    setInstitutionPermissions(prev => {
+      const updated = { ...prev };
+      if (!updated[selectedInstitute]) {
+        updated[selectedInstitute] = {
+          adminPermissions: { ...defaultAdminPermissions },
+          teacherPermissions: { ...defaultTeacherPermissions },
+          studentPermissions: { ...defaultStudentPermissions }
+        };
+      }
+      updated[selectedInstitute].teacherPermissions = {
+        ...updated[selectedInstitute].teacherPermissions,
+        [key]: value
+      };
+      return updated;
+    });
   };
 
   const updateStudentPermission = (key: keyof StudentPermissions, value: boolean) => {
-    setStudentPermissions(prev => ({ ...prev, [key]: value }));
+    setInstitutionPermissions(prev => {
+      const updated = { ...prev };
+      if (!updated[selectedInstitute]) {
+        updated[selectedInstitute] = {
+          adminPermissions: { ...defaultAdminPermissions },
+          teacherPermissions: { ...defaultTeacherPermissions },
+          studentPermissions: { ...defaultStudentPermissions }
+        };
+      }
+      updated[selectedInstitute].studentPermissions = {
+        ...updated[selectedInstitute].studentPermissions,
+        [key]: value
+      };
+      return updated;
+    });
   };
 
   const savePermissions = () => {
-    localStorage.setItem("adminPermissions", JSON.stringify(adminPermissions));
-    localStorage.setItem("teacherPermissions", JSON.stringify(teacherPermissions));
-    localStorage.setItem("studentPermissions", JSON.stringify(studentPermissions));
-    console.log("Permissions saved successfully");
+    localStorage.setItem("institutionPermissions", JSON.stringify(institutionPermissions));
+    console.log("Permissions saved successfully for all institutions");
   };
 
   const hasPermission = (role: string, permission: string): boolean => {
     if (role === "superadmin") return true; // Superadmin has all permissions
     
+    // If user is not superadmin, check their specific institution permissions
+    const userInstitute = user?.institute || selectedInstitute;
+    const institutePermissions = institutionPermissions[userInstitute];
+    
+    if (!institutePermissions) {
+      return false; // No permissions defined for this institution
+    }
+    
     if (role === "admin") {
-      return adminPermissions[permission as keyof AdminPermissions] ?? false;
+      return institutePermissions.adminPermissions[permission as keyof AdminPermissions] ?? false;
     }
     
     if (role === "teacher") {
-      return teacherPermissions[permission as keyof TeacherPermissions] ?? false;
+      return institutePermissions.teacherPermissions[permission as keyof TeacherPermissions] ?? false;
     }
     
     if (role === "student") {
-      return studentPermissions[permission as keyof StudentPermissions] ?? false;
+      return institutePermissions.studentPermissions[permission as keyof StudentPermissions] ?? false;
     }
     
     return false;
@@ -136,14 +218,17 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   return (
     <PermissionContext.Provider
       value={{
-        adminPermissions,
-        teacherPermissions,
-        studentPermissions,
+        adminPermissions: currentInstitutePermissions.adminPermissions,
+        teacherPermissions: currentInstitutePermissions.teacherPermissions,
+        studentPermissions: currentInstitutePermissions.studentPermissions,
         updateAdminPermission,
         updateTeacherPermission,
         updateStudentPermission,
         savePermissions,
         hasPermission,
+        selectedInstitute,
+        setSelectedInstitute,
+        allInstitutions: defaultInstitutions,
       }}
     >
       {children}

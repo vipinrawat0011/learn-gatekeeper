@@ -34,18 +34,8 @@ import {
 } from "lucide-react";
 
 export default function PermissionManagementPage() {
-  const [selectedAdmin, setSelectedAdmin] = useState("city-school");
-  const [activeTab, setActiveTab] = useState("admin");
   const { toast } = useToast();
-  
-  // Mock data for admin institutions
-  const admins = [
-    { id: "city-school", name: "City School" },
-    { id: "valley-academy", name: "Valley Academy" },
-    { id: "tech-institute", name: "Tech Institute" },
-    { id: "global-academy", name: "Global Academy" },
-  ];
-  
+  const [activeTab, setActiveTab] = useState("admin");
   const { 
     adminPermissions, 
     teacherPermissions, 
@@ -53,14 +43,17 @@ export default function PermissionManagementPage() {
     updateAdminPermission,
     updateTeacherPermission,
     updateStudentPermission,
-    savePermissions
+    savePermissions,
+    selectedInstitute,
+    setSelectedInstitute,
+    allInstitutions
   } = usePermissions();
   
   const handleSavePermissions = () => {
     savePermissions();
     toast({
       title: "Permissions Saved",
-      description: "Role permissions have been updated successfully.",
+      description: `Role permissions for ${selectedInstitute} have been updated successfully.`,
     });
   };
 
@@ -77,21 +70,21 @@ export default function PermissionManagementPage() {
     <DashboardLayout 
       role="superadmin" 
       title="Permission Manager"
-      subtitle="Control access to features for each user role"
+      subtitle="Control access to features for each user role by institution"
     >
       <div className="mb-6">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <Select value={selectedAdmin} onValueChange={setSelectedAdmin}>
+            <Select value={selectedInstitute} onValueChange={setSelectedInstitute}>
               <SelectTrigger className="w-[250px]">
                 <SelectValue placeholder="Select an institution" />
               </SelectTrigger>
               <SelectContent>
-                {admins.map(admin => (
-                  <SelectItem key={admin.id} value={admin.id}>
+                {allInstitutions.map(institute => (
+                  <SelectItem key={institute} value={institute}>
                     <div className="flex items-center">
                       <School className="h-4 w-4 mr-2" />
-                      {admin.name}
+                      {institute}
                     </div>
                   </SelectItem>
                 ))}
@@ -107,6 +100,11 @@ export default function PermissionManagementPage() {
               <Save className="h-4 w-4 mr-2" /> Save Changes
             </Button>
           </div>
+        </div>
+        
+        <div className="mt-4 text-sm text-muted-foreground">
+          <p>Currently managing permissions for <span className="font-semibold">{selectedInstitute}</span></p>
+          <p>Changes made here will affect all users of this institution with the selected role.</p>
         </div>
       </div>
       
@@ -129,7 +127,7 @@ export default function PermissionManagementPage() {
               <div className="p-6">
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold flex items-center">
-                    <Shield className="h-5 w-5 mr-2" /> Admin Role Permissions
+                    <Shield className="h-5 w-5 mr-2" /> Admin Role Permissions for {selectedInstitute}
                   </h3>
                   <p className="text-sm text-muted-foreground">Control who has access to admin tools and dashboards</p>
                 </div>
@@ -245,7 +243,7 @@ export default function PermissionManagementPage() {
               <div className="p-6">
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold flex items-center">
-                    <BookOpen className="h-5 w-5 mr-2" /> Teacher Role Permissions
+                    <BookOpen className="h-5 w-5 mr-2" /> Teacher Role Permissions for {selectedInstitute}
                   </h3>
                   <p className="text-sm text-muted-foreground">Control what features teachers can access</p>
                 </div>
@@ -322,7 +320,7 @@ export default function PermissionManagementPage() {
               <div className="p-6">
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold flex items-center">
-                    <GraduationCap className="h-5 w-5 mr-2" /> Student Role Permissions
+                    <GraduationCap className="h-5 w-5 mr-2" /> Student Role Permissions for {selectedInstitute}
                   </h3>
                   <p className="text-sm text-muted-foreground">Control what features students can access</p>
                 </div>
@@ -386,7 +384,7 @@ export default function PermissionManagementPage() {
         
         <Card className="border shadow-sm">
           <CardHeader>
-            <CardTitle>Permission Overview</CardTitle>
+            <CardTitle>Permission Overview for {selectedInstitute}</CardTitle>
             <p className="text-sm text-muted-foreground">Summarized view of all role permissions</p>
           </CardHeader>
           <CardContent>

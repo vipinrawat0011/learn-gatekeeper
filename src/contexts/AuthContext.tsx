@@ -31,8 +31,9 @@ const AuthContext = createContext<AuthContextType>({
 
 export const useAuth = () => useContext(AuthContext);
 
-// Mock users for demonstration
+// Mock users for demonstration - expanded with multiple users per role and institution
 const mockUsers = [
+  // Super Admin - has access to everything
   {
     id: "1",
     name: "Super Admin",
@@ -40,33 +41,101 @@ const mockUsers = [
     password: "password",
     role: "superadmin" as UserRole,
   },
+  
+  // City School Admins
   {
     id: "2",
-    name: "City School Admin",
-    email: "admin@cityschool.com",
+    name: "City School Admin 1",
+    email: "admin1@cityschool.com",
     password: "password",
     role: "admin" as UserRole,
     institute: "City School",
   },
   {
     id: "3",
-    name: "Jane Smith",
-    email: "teacher@example.com",
+    name: "City School Admin 2",
+    email: "admin2@cityschool.com",
+    password: "password",
+    role: "admin" as UserRole,
+    institute: "City School",
+  },
+  
+  // Valley Academy Admins
+  {
+    id: "4",
+    name: "Valley Academy Admin",
+    email: "admin@valleyacademy.com",
+    password: "password",
+    role: "admin" as UserRole,
+    institute: "Valley Academy",
+  },
+  
+  // City School Teachers
+  {
+    id: "5",
+    name: "Jane Smith - Physics",
+    email: "teacher1@cityschool.com",
     password: "password",
     role: "teacher" as UserRole,
     institute: "City School",
     subject: "Physics",
   },
   {
-    id: "4",
-    name: "John Student",
-    email: "student@example.com",
+    id: "6",
+    name: "Robert Brown - Math",
+    email: "teacher2@cityschool.com",
+    password: "password",
+    role: "teacher" as UserRole,
+    institute: "City School",
+    subject: "Mathematics",
+  },
+  
+  // Valley Academy Teachers
+  {
+    id: "7",
+    name: "Alice Johnson - Biology",
+    email: "teacher1@valleyacademy.com",
+    password: "password",
+    role: "teacher" as UserRole,
+    institute: "Valley Academy",
+    subject: "Biology",
+  },
+  
+  // City School Students
+  {
+    id: "8",
+    name: "John Student - City School",
+    email: "student1@cityschool.com",
     password: "password",
     role: "student" as UserRole,
     institute: "City School",
     class: "10",
     section: "A",
     scholarType: "Junior Scholar" as "Junior Scholar" | "Rising Intellect" | "Mastermind Elite",
+  },
+  {
+    id: "9",
+    name: "Emma Wilson - City School",
+    email: "student2@cityschool.com",
+    password: "password",
+    role: "student" as UserRole,
+    institute: "City School",
+    class: "11",
+    section: "B",
+    scholarType: "Rising Intellect" as "Junior Scholar" | "Rising Intellect" | "Mastermind Elite",
+  },
+  
+  // Valley Academy Students
+  {
+    id: "10",
+    name: "Michael Davis - Valley Academy",
+    email: "student1@valleyacademy.com",
+    password: "password",
+    role: "student" as UserRole,
+    institute: "Valley Academy",
+    class: "9",
+    section: "A",
+    scholarType: "Mastermind Elite" as "Junior Scholar" | "Rising Intellect" | "Mastermind Elite",
   },
 ];
 
@@ -90,7 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (foundUser) {
       // Log the successful login attempt for debugging
-      console.log("Login successful for user:", foundUser.email, "with role:", foundUser.role);
+      console.log("Login successful for user:", foundUser.email, "with role:", foundUser.role, "institute:", foundUser.institute);
       
       const { password, ...userWithoutPassword } = foundUser;
       setUser(userWithoutPassword);

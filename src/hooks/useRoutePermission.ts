@@ -15,7 +15,7 @@ export const useRoutePermission = () => {
     
     // Admin role permissions - enforce strict permission checks
     if (user.role === "admin") {
-      // Check permissions for all admin routes
+      // Check permissions for all admin routes with the user's specific institute
       if (path === "/admin/dashboard") return hasPermission("admin", "dashboard");
       if (path === "/admin/user-management") return hasPermission("admin", "userManagement");
       if (path === "/admin/courses") return hasPermission("admin", "contentReview");
@@ -28,7 +28,7 @@ export const useRoutePermission = () => {
       return false;
     }
     
-    // Teacher role permissions - enforce strict permission checks
+    // Teacher role permissions - enforce strict permission checks using the teacher's specific institute
     if (user.role === "teacher") {
       // Check permissions for all teacher routes
       if (path === "/teacher/dashboard") return hasPermission("teacher", "dashboard");
@@ -46,7 +46,7 @@ export const useRoutePermission = () => {
       return false;
     }
     
-    // Student role permissions - enforce strict permission checks
+    // Student role permissions - enforce strict permission checks using the student's specific institute
     if (user.role === "student") {
       if (path === "/student/dashboard") return hasPermission("student", "dashboard");
       if (path === "/student/examination") return hasPermission("student", "upcomingTests");

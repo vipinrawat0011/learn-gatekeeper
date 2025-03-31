@@ -6,13 +6,12 @@ import "./index.css";
 
 // For debugging purposes, you can view permissions in console
 const debugPermissions = () => {
-  console.log("Admin permissions:", localStorage.getItem("adminPermissions"));
-  console.log("Teacher permissions:", localStorage.getItem("teacherPermissions"));
-  console.log("Student permissions:", localStorage.getItem("studentPermissions"));
+  console.log("Institution permissions:", localStorage.getItem("institutionPermissions"));
+  console.log("Current user:", localStorage.getItem("user"));
 };
 
 // Uncomment this line to debug permissions
-// debugPermissions();
+debugPermissions();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
