@@ -280,11 +280,23 @@ export function Sidebar({ role }: SidebarProps) {
         <div className="px-3 py-2">
           <h3 className="mb-2 px-4 text-xs font-semibold text-muted-foreground">SETTINGS</h3>
           {(role === "superadmin" || role === "admin" || role === "teacher" || role === "student") && (
-            <NavLink href="/profile" icon={User} label="Profile" active={path === "/profile"} />
+            <NavLink 
+              href="/profile" 
+              icon={User} 
+              label="Profile" 
+              active={path === "/profile"} 
+              visible={isAllowed("/profile")}
+            />
           )}
           
           {(role === "superadmin" || role === "admin" || role === "teacher") && (
-            <NavLink href="/settings" icon={Settings} label="Settings" active={path === "/settings"} />
+            <NavLink 
+              href="/settings" 
+              icon={Settings} 
+              label="Settings" 
+              active={path === "/settings"} 
+              visible={isAllowed("/settings")}
+            />
           )}
           
           <Button

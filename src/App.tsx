@@ -81,14 +81,25 @@ const ProtectedRoute = ({
   if (!isAllowed(path)) {
     // Path is not allowed due to permissions
     console.log(`Access denied to ${path} due to permissions`);
+    
+    // Redirect based on user role to their dashboard if they have permission, otherwise to login
     if (user?.role === "superadmin") {
       return <Navigate to="/superadmin/dashboard" replace />;
     } else if (user?.role === "admin") {
-      return <Navigate to="/admin/dashboard" replace />;
+      const adminAllowed = isAllowed("/admin/dashboard");
+      return adminAllowed 
+        ? <Navigate to="/admin/dashboard" replace />
+        : <Navigate to={`/login/${user.role}`} replace />;
     } else if (user?.role === "teacher") {
-      return <Navigate to="/teacher/dashboard" replace />;
+      const teacherAllowed = isAllowed("/teacher/dashboard");
+      return teacherAllowed 
+        ? <Navigate to="/teacher/dashboard" replace />
+        : <Navigate to={`/login/${user.role}`} replace />;
     } else if (user?.role === "student") {
-      return <Navigate to="/student/dashboard" replace />;
+      const studentAllowed = isAllowed("/student/dashboard");
+      return studentAllowed 
+        ? <Navigate to="/student/dashboard" replace />
+        : <Navigate to={`/login/${user.role}`} replace />;
     }
     
     // Default redirect if role doesn't match any expected value
