@@ -3,9 +3,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { PermissionProvider, usePermissions } from "./contexts/PermissionContext";
+import { useRoutePermission } from "./hooks/useRoutePermission";
 
 // Pages
 import LandingPage from "./pages/LandingPage";
@@ -59,23 +60,39 @@ const queryClient = new QueryClient();
 const ProtectedRoute = ({ 
   element, 
   requiredRole, 
+  path,
   requiredPermission 
 }: { 
   element: JSX.Element, 
-  requiredRole: string, 
+  requiredRole: string,
+  path: string,
   requiredPermission?: string 
 }) => {
   const { user, isAuthenticated } = useAuth();
-  const { hasPermission } = usePermissions();
+  const { isAllowed } = useRoutePermission();
   
+  // First check if the user is authenticated and has the required role
   if (!isAuthenticated || user?.role !== requiredRole) {
     // Not authenticated or wrong role, redirect to login
     return <Navigate to={`/login/${requiredRole}`} replace />;
   }
   
-  if (requiredPermission && !hasPermission(requiredRole, requiredPermission)) {
-    // Doesn't have the required permission, redirect to dashboard
-    return <Navigate to={`/${requiredRole}/dashboard`} replace />;
+  // Then check if the path is allowed based on permissions
+  if (!isAllowed(path)) {
+    // Path is not allowed due to permissions
+    console.log(`Access denied to ${path} due to permissions`);
+    if (user?.role === "superadmin") {
+      return <Navigate to="/superadmin/dashboard" replace />;
+    } else if (user?.role === "admin") {
+      return <Navigate to="/admin/dashboard" replace />;
+    } else if (user?.role === "teacher") {
+      return <Navigate to="/teacher/dashboard" replace />;
+    } else if (user?.role === "student") {
+      return <Navigate to="/student/dashboard" replace />;
+    }
+    
+    // Default redirect if role doesn't match any expected value
+    return <Navigate to="/" replace />;
   }
   
   return element;
@@ -93,96 +110,96 @@ const AppContent = () => {
       <Route path="/login/teacher" element={<TeacherLogin />} />
       <Route path="/login/student" element={<StudentLogin />} />
       
-      {/* Dashboard Routes - Only check role, not permissions */}
+      {/* Dashboard Routes */}
       <Route 
         path="/superadmin/dashboard" 
-        element={<ProtectedRoute element={<SuperAdminDashboard />} requiredRole="superadmin" />} 
+        element={<ProtectedRoute element={<SuperAdminDashboard />} requiredRole="superadmin" path="/superadmin/dashboard" />} 
       />
       <Route 
         path="/admin/dashboard" 
-        element={<ProtectedRoute element={<AdminDashboard />} requiredRole="admin" requiredPermission="dashboard" />} 
+        element={<ProtectedRoute element={<AdminDashboard />} requiredRole="admin" path="/admin/dashboard" requiredPermission="dashboard" />} 
       />
       <Route 
         path="/teacher/dashboard" 
-        element={<ProtectedRoute element={<TeacherDashboard />} requiredRole="teacher" requiredPermission="dashboard" />} 
+        element={<ProtectedRoute element={<TeacherDashboard />} requiredRole="teacher" path="/teacher/dashboard" requiredPermission="dashboard" />} 
       />
       <Route 
         path="/student/dashboard" 
-        element={<ProtectedRoute element={<StudentDashboard />} requiredRole="student" requiredPermission="dashboard" />} 
+        element={<ProtectedRoute element={<StudentDashboard />} requiredRole="student" path="/student/dashboard" requiredPermission="dashboard" />} 
       />
       
-      {/* SuperAdmin Routes - Only check role, superadmin has all permissions */}
+      {/* SuperAdmin Routes */}
       <Route 
         path="/superadmin/user-management" 
-        element={<ProtectedRoute element={<UserManagementPage />} requiredRole="superadmin" />} 
+        element={<ProtectedRoute element={<UserManagementPage />} requiredRole="superadmin" path="/superadmin/user-management" />} 
       />
       <Route 
         path="/superadmin/permission-management" 
-        element={<ProtectedRoute element={<PermissionManagementPage />} requiredRole="superadmin" />} 
+        element={<ProtectedRoute element={<PermissionManagementPage />} requiredRole="superadmin" path="/superadmin/permission-management" />} 
       />
       
-      {/* Admin Routes - Check both role and permissions */}
+      {/* Admin Routes */}
       <Route 
         path="/admin/user-management" 
-        element={<ProtectedRoute element={<AdminUserManagementPage />} requiredRole="admin" requiredPermission="userManagement" />} 
+        element={<ProtectedRoute element={<AdminUserManagementPage />} requiredRole="admin" path="/admin/user-management" requiredPermission="userManagement" />} 
       />
       <Route 
         path="/admin/courses" 
-        element={<ProtectedRoute element={<CoursesPage />} requiredRole="admin" requiredPermission="contentReview" />} 
+        element={<ProtectedRoute element={<CoursesPage />} requiredRole="admin" path="/admin/courses" requiredPermission="contentReview" />} 
       />
       <Route 
         path="/admin/approvals" 
-        element={<ProtectedRoute element={<ApprovalPage />} requiredRole="admin" requiredPermission="approvals" />} 
+        element={<ProtectedRoute element={<ApprovalPage />} requiredRole="admin" path="/admin/approvals" requiredPermission="approvals" />} 
       />
       <Route 
         path="/admin/student-management" 
-        element={<ProtectedRoute element={<StudentManagementPage />} requiredRole="admin" requiredPermission="studentClassification" />} 
+        element={<ProtectedRoute element={<StudentManagementPage />} requiredRole="admin" path="/admin/student-management" requiredPermission="studentClassification" />} 
       />
       <Route 
         path="/admin/progress-tracking" 
-        element={<ProtectedRoute element={<ProgressTrackingPage />} requiredRole="admin" requiredPermission="studentClassification" />} 
+        element={<ProtectedRoute element={<ProgressTrackingPage />} requiredRole="admin" path="/admin/progress-tracking" requiredPermission="studentClassification" />} 
       />
       <Route 
         path="/admin/classroom" 
-        element={<ProtectedRoute element={<ClassroomPage />} requiredRole="admin" requiredPermission="userManagement" />} 
+        element={<ProtectedRoute element={<ClassroomPage />} requiredRole="admin" path="/admin/classroom" requiredPermission="userManagement" />} 
       />
       
-      {/* Teacher Routes - Check both role and permissions */}
+      {/* Teacher Routes */}
       <Route 
         path="/teacher/my-classroom" 
-        element={<ProtectedRoute element={<MyClassroomPage />} requiredRole="teacher" requiredPermission="students" />} 
+        element={<ProtectedRoute element={<MyClassroomPage />} requiredRole="teacher" path="/teacher/my-classroom" requiredPermission="students" />} 
       />
       <Route 
         path="/teacher/subject" 
-        element={<ProtectedRoute element={<SubjectPage />} requiredRole="teacher" requiredPermission="studyMaterials" />} 
+        element={<ProtectedRoute element={<SubjectPage />} requiredRole="teacher" path="/teacher/subject" requiredPermission="studyMaterials" />} 
       />
       <Route 
         path="/teacher/student-performance" 
-        element={<ProtectedRoute element={<StudentPerformancePage />} requiredRole="teacher" requiredPermission="students" />} 
+        element={<ProtectedRoute element={<StudentPerformancePage />} requiredRole="teacher" path="/teacher/student-performance" requiredPermission="students" />} 
       />
       <Route 
         path="/teacher/courses" 
-        element={<ProtectedRoute element={<TeacherCoursesPage />} requiredRole="teacher" requiredPermission="studyMaterials" />} 
+        element={<ProtectedRoute element={<TeacherCoursesPage />} requiredRole="teacher" path="/teacher/courses" requiredPermission="studyMaterials" />} 
       />
       <Route 
         path="/teacher/study-material" 
-        element={<ProtectedRoute element={<StudyMaterialPage />} requiredRole="teacher" requiredPermission="studyMaterials" />} 
+        element={<ProtectedRoute element={<StudyMaterialPage />} requiredRole="teacher" path="/teacher/study-material" requiredPermission="studyMaterials" />} 
       />
       <Route 
         path="/teacher/assessments" 
-        element={<ProtectedRoute element={<AssessmentsPage />} requiredRole="teacher" requiredPermission="exams" />} 
+        element={<ProtectedRoute element={<AssessmentsPage />} requiredRole="teacher" path="/teacher/assessments" requiredPermission="exams" />} 
       />
       <Route 
         path="/teacher/schedule" 
-        element={<ProtectedRoute element={<SchedulePage />} requiredRole="teacher" />} 
+        element={<ProtectedRoute element={<SchedulePage />} requiredRole="teacher" path="/teacher/schedule" />} 
       />
       <Route 
         path="/teacher/marks" 
-        element={<ProtectedRoute element={<MarksPage />} requiredRole="teacher" requiredPermission="exams" />} 
+        element={<ProtectedRoute element={<MarksPage />} requiredRole="teacher" path="/teacher/marks" requiredPermission="exams" />} 
       />
       <Route 
         path="/teacher/profile" 
-        element={<ProtectedRoute element={<TeacherProfilePage />} requiredRole="teacher" />} 
+        element={<ProtectedRoute element={<TeacherProfilePage />} requiredRole="teacher" path="/teacher/profile" />} 
       />
       <Route 
         path="/profile" 
@@ -193,26 +210,26 @@ const AppContent = () => {
         element={<TeacherProfilePage />} 
       />
       
-      {/* Student Routes - Check both role and permissions */}
+      {/* Student Routes */}
       <Route 
         path="/student/courses" 
-        element={<ProtectedRoute element={<StudentCoursesPage />} requiredRole="student" />} 
+        element={<ProtectedRoute element={<StudentCoursesPage />} requiredRole="student" path="/student/courses" />} 
       />
       <Route 
         path="/student/examination" 
-        element={<ProtectedRoute element={<ExaminationPage />} requiredRole="student" requiredPermission="upcomingTests" />} 
+        element={<ProtectedRoute element={<ExaminationPage />} requiredRole="student" path="/student/examination" requiredPermission="upcomingTests" />} 
       />
       <Route 
         path="/student/marks" 
-        element={<ProtectedRoute element={<StudentMarksPage />} requiredRole="student" requiredPermission="progress" />} 
+        element={<ProtectedRoute element={<StudentMarksPage />} requiredRole="student" path="/student/marks" requiredPermission="progress" />} 
       />
       <Route 
         path="/student/study-material" 
-        element={<ProtectedRoute element={<StudentStudyMaterialPage />} requiredRole="student" />} 
+        element={<ProtectedRoute element={<StudentStudyMaterialPage />} requiredRole="student" path="/student/study-material" />} 
       />
       <Route 
         path="/student/ai-assistant" 
-        element={<ProtectedRoute element={<AiLearningAssistantPage />} requiredRole="student" />} 
+        element={<ProtectedRoute element={<AiLearningAssistantPage />} requiredRole="student" path="/student/ai-assistant" />} 
       />
       
       {/* Catch-all route */}

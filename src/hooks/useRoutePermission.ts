@@ -7,12 +7,20 @@ export const useRoutePermission = () => {
   const { hasPermission } = usePermissions();
   
   const isAllowed = (path: string): boolean => {
+    // If no user is logged in, deny access to protected routes
+    if (!user) return false;
+    
     // Superadmin can access everything
-    if (user?.role === "superadmin") return true;
+    if (user.role === "superadmin") return true;
     
     // Admin role permissions
-    if (user?.role === "admin") {
-      if (path === "/admin/dashboard") return hasPermission("admin", "dashboard");
+    if (user.role === "admin") {
+      // Basic permission check for dashboard access
+      if (path === "/admin/dashboard") {
+        return hasPermission("admin", "dashboard");
+      }
+      
+      // Check permissions for other admin routes
       if (path === "/admin/user-management") return hasPermission("admin", "userManagement");
       if (path === "/admin/courses") return hasPermission("admin", "contentReview");
       if (path === "/admin/approvals") return hasPermission("admin", "approvals");
@@ -22,7 +30,7 @@ export const useRoutePermission = () => {
     }
     
     // Teacher role permissions
-    if (user?.role === "teacher") {
+    if (user.role === "teacher") {
       if (path === "/teacher/dashboard") return hasPermission("teacher", "dashboard");
       if (path === "/teacher/my-classroom") return hasPermission("teacher", "students");
       if (path === "/teacher/subject") return hasPermission("teacher", "studyMaterials");
@@ -37,7 +45,7 @@ export const useRoutePermission = () => {
     }
     
     // Student role permissions
-    if (user?.role === "student") {
+    if (user.role === "student") {
       if (path === "/student/dashboard") return hasPermission("student", "dashboard");
       if (path === "/student/examination") return hasPermission("student", "upcomingTests");
       if (path === "/student/marks") return hasPermission("student", "progress");
@@ -50,6 +58,7 @@ export const useRoutePermission = () => {
     // Default case - profile and settings are allowed for any authenticated user
     if (path === "/profile" || path === "/settings") return true;
     
+    // If no specific rule matches, deny access
     return false;
   };
   
