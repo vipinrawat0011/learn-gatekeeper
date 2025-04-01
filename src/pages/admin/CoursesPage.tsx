@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { FileText, Search, Filter, Plus, Upload, Video, File, Trash2, X } from "lucide-react";
+import { FileText, Search, Filter, Plus, Upload, Video, File, Trash2, X, AlertCircle } from "lucide-react";
 import { 
   Dialog, 
   DialogContent, 
@@ -21,6 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card } from "@/components/ui/card";
+import { toast } from "@/hooks/use-toast";
 
 // Mock course data
 const coursesData = [
@@ -102,24 +103,59 @@ export default function CoursesPage() {
   // Chapter editing state
   const [activeChapterIndex, setActiveChapterIndex] = useState(0);
   const [chapterContentType, setChapterContentType] = useState("text"); // text, video, file
+  const [isAddingChapter, setIsAddingChapter] = useState(false);
 
-  // Handle adding a new chapter
+  // Handle adding a new chapter with debounce to prevent multiple rapid clicks
   const handleAddChapter = () => {
-    setNewCourse(prev => ({
-      ...prev,
-      chapters: [...prev.chapters, { ...initialChapter }]
-    }));
-    setActiveChapterIndex(newCourse.chapters.length);
+    if (isAddingChapter) return; // Prevent multiple clicks
+    
+    setIsAddingChapter(true);
+    
+    try {
+      const newChapter = { ...initialChapter };
+      setNewCourse(prev => ({
+        ...prev,
+        chapters: [...prev.chapters, newChapter]
+      }));
+      
+      // Set active chapter to the newly added one
+      setActiveChapterIndex(newCourse.chapters.length);
+      toast({
+        title: "Chapter added",
+        description: `New chapter ${newCourse.chapters.length + 1} added successfully`,
+      });
+    } catch (error) {
+      console.error("Error adding chapter:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add chapter. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      // Reset flag after a short delay
+      setTimeout(() => setIsAddingChapter(false), 300);
+    }
   };
 
   // Handle removing a chapter
   const handleRemoveChapter = (index: number) => {
+    // Prevent removing the last chapter
+    if (newCourse.chapters.length <= 1) {
+      toast({
+        title: "Cannot remove",
+        description: "A course must have at least one chapter",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     const updatedChapters = [...newCourse.chapters];
     updatedChapters.splice(index, 1);
     setNewCourse(prev => ({
       ...prev,
       chapters: updatedChapters
     }));
+    
     // Update active chapter index if needed
     if (activeChapterIndex >= updatedChapters.length) {
       setActiveChapterIndex(Math.max(0, updatedChapters.length - 1));
@@ -166,16 +202,28 @@ export default function CoursesPage() {
       ...prev,
       chapters: updatedChapters
     }));
+    
+    toast({
+      title: "Material added",
+      description: `${name} has been added to chapter successfully`,
+    });
   };
 
   // Handle removing material from a chapter
   const handleRemoveMaterial = (chapterIndex: number, materialIndex: number) => {
     const updatedChapters = [...newCourse.chapters];
+    const materialName = updatedChapters[chapterIndex].materials[materialIndex]?.name || "Material";
     updatedChapters[chapterIndex].materials.splice(materialIndex, 1);
+    
     setNewCourse(prev => ({
       ...prev,
       chapters: updatedChapters
     }));
+    
+    toast({
+      title: "Material removed",
+      description: `${materialName} has been removed from the chapter`,
+    });
   };
 
   // Handle course form input changes
@@ -189,8 +237,22 @@ export default function CoursesPage() {
 
   // Handle form submission
   const handleSubmitCourse = () => {
+    if (!newCourse.title.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Course title is required",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     console.log('Submitting course:', newCourse);
     // Here you would typically send this to your API
+    toast({
+      title: "Course created",
+      description: `${newCourse.title} has been created successfully`,
+    });
+    
     // Reset form and close dialog
     setNewCourse({
       title: "",
@@ -201,6 +263,7 @@ export default function CoursesPage() {
       level: "beginner",
       chapters: [{ ...initialChapter }]
     });
+    setActiveChapterIndex(0);
     setShowAddDialog(false);
   };
 
@@ -444,7 +507,12 @@ export default function CoursesPage() {
               </div>
 
               <div className="pt-4">
-                <Button onClick={handleAddChapter} variant="outline" className="w-full">
+                <Button 
+                  onClick={handleAddChapter} 
+                  variant="outline" 
+                  className="w-full"
+                  disabled={isAddingChapter}
+                >
                   <Plus className="h-4 w-4 mr-2" /> Add Chapter
                 </Button>
               </div>
@@ -455,13 +523,13 @@ export default function CoursesPage() {
             
             {/* Right side - Chapters */}
             <div className="md:w-2/3 flex flex-col overflow-hidden">
-              <div className="text-sm font-medium mb-2">Chapters</div>
+              <div className="text-sm font-medium mb-2">Chapters ({newCourse.chapters.length})</div>
               
               {newCourse.chapters.length > 0 ? (
                 <div className="flex flex-col h-full">
                   {/* Chapter navigation */}
                   <ScrollArea className="h-[80px] border rounded-md p-2 mb-4">
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       {newCourse.chapters.map((chapter, index) => (
                         <div key={index} className="flex items-center">
                           <Button 
@@ -494,7 +562,7 @@ export default function CoursesPage() {
                         <Label htmlFor={`chapter-${activeChapterIndex}-title`}>Chapter Title</Label>
                         <Input 
                           id={`chapter-${activeChapterIndex}-title`}
-                          value={newCourse.chapters[activeChapterIndex].title}
+                          value={newCourse.chapters[activeChapterIndex]?.title || ''}
                           onChange={(e) => handleUpdateChapterTitle(activeChapterIndex, e.target.value)}
                           placeholder={`Chapter ${activeChapterIndex + 1}`}
                         />
@@ -503,7 +571,7 @@ export default function CoursesPage() {
                       {/* Content type selector */}
                       <div>
                         <Label className="mb-2 block">Content Type</Label>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                           <Button 
                             variant={chapterContentType === "text" ? "default" : "outline"}
                             size="sm"
@@ -535,7 +603,7 @@ export default function CoursesPage() {
                             <Label htmlFor={`chapter-${activeChapterIndex}-content`}>Text Content</Label>
                             <Textarea 
                               id={`chapter-${activeChapterIndex}-content`}
-                              value={newCourse.chapters[activeChapterIndex].content}
+                              value={newCourse.chapters[activeChapterIndex]?.content || ''}
                               onChange={(e) => handleUpdateChapterContent(activeChapterIndex, e.target.value)}
                               placeholder="Enter chapter content here..."
                               className="resize-none min-h-[200px]"
@@ -585,7 +653,7 @@ export default function CoursesPage() {
                       </div>
 
                       {/* Materials list */}
-                      {newCourse.chapters[activeChapterIndex].materials.length > 0 && (
+                      {newCourse.chapters[activeChapterIndex]?.materials?.length > 0 && (
                         <div className="mt-4">
                           <Label className="mb-2 block">Uploaded Materials</Label>
                           <div className="space-y-2">
@@ -618,8 +686,17 @@ export default function CoursesPage() {
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-full text-muted-foreground">
-                  <p>No chapters added yet</p>
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8 border-2 border-dashed rounded-md">
+                  <AlertCircle className="h-12 w-12 mb-2 text-muted-foreground" />
+                  <p className="text-center">No chapters added yet</p>
+                  <Button 
+                    variant="outline" 
+                    onClick={handleAddChapter} 
+                    className="mt-4"
+                    disabled={isAddingChapter}
+                  >
+                    <Plus className="h-4 w-4 mr-2" /> Add First Chapter
+                  </Button>
                 </div>
               )}
             </div>
