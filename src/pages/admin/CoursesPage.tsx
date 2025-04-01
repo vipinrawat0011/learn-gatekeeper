@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -105,24 +104,30 @@ export default function CoursesPage() {
   const [chapterContentType, setChapterContentType] = useState("text"); // text, video, file
   const [isAddingChapter, setIsAddingChapter] = useState(false);
 
-  // Handle adding a new chapter with debounce to prevent multiple rapid clicks
-  const handleAddChapter = () => {
+  // Improved chapter addition with debounce and proper error handling
+  const handleAddChapter = useCallback(() => {
     if (isAddingChapter) return; // Prevent multiple clicks
     
     setIsAddingChapter(true);
     
     try {
-      const newChapter = { ...initialChapter };
-      setNewCourse(prev => ({
-        ...prev,
-        chapters: [...prev.chapters, newChapter]
-      }));
+      setNewCourse(prev => {
+        const updatedCourseData = {
+          ...prev,
+          chapters: [...prev.chapters, { ...initialChapter }]
+        };
+        
+        // Set active chapter to the newly added one after state update
+        setTimeout(() => {
+          setActiveChapterIndex(updatedCourseData.chapters.length - 1);
+        }, 0);
+        
+        return updatedCourseData;
+      });
       
-      // Set active chapter to the newly added one
-      setActiveChapterIndex(newCourse.chapters.length);
       toast({
         title: "Chapter added",
-        description: `New chapter ${newCourse.chapters.length + 1} added successfully`,
+        description: `New chapter added successfully`,
       });
     } catch (error) {
       console.error("Error adding chapter:", error);
@@ -135,7 +140,7 @@ export default function CoursesPage() {
       // Reset flag after a short delay
       setTimeout(() => setIsAddingChapter(false), 300);
     }
-  };
+  }, [isAddingChapter]);
 
   // Handle removing a chapter
   const handleRemoveChapter = (index: number) => {
@@ -523,7 +528,9 @@ export default function CoursesPage() {
             
             {/* Right side - Chapters */}
             <div className="md:w-2/3 flex flex-col overflow-hidden">
-              <div className="text-sm font-medium mb-2">Chapters ({newCourse.chapters.length})</div>
+              <div className="text-sm font-medium mb-2">
+                Chapters ({newCourse.chapters.length})
+              </div>
               
               {newCourse.chapters.length > 0 ? (
                 <div className="flex flex-col h-full">
@@ -531,7 +538,7 @@ export default function CoursesPage() {
                   <ScrollArea className="h-[80px] border rounded-md p-2 mb-4">
                     <div className="flex flex-wrap gap-2">
                       {newCourse.chapters.map((chapter, index) => (
-                        <div key={index} className="flex items-center">
+                        <div key={`chapter-${index}`} className="flex items-center">
                           <Button 
                             variant={activeChapterIndex === index ? "default" : "outline"}
                             size="sm"
