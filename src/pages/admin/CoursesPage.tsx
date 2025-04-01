@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { FileText, Search, Filter, Plus } from "lucide-react";
+import { FileText, Search, Filter, Plus, Upload, Video, File, Trash2, X } from "lucide-react";
 import { 
   Dialog, 
   DialogContent, 
@@ -17,6 +17,10 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Card } from "@/components/ui/card";
 
 // Mock course data
 const coursesData = [
@@ -70,12 +74,148 @@ const coursesData = [
   }
 ];
 
+// Initial chapter structure
+const initialChapter = {
+  title: "",
+  content: "",
+  materials: [] // For PDFs, PPTs, videos
+};
+
 export default function CoursesPage() {
   const [selectedGrade, setSelectedGrade] = useState("1");
   const [selectedLevel, setSelectedLevel] = useState("All Levels");
   const [activeTab, setActiveTab] = useState("all");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showCurriculumDialog, setShowCurriculumDialog] = useState(false);
+  
+  // New course state
+  const [newCourse, setNewCourse] = useState({
+    title: "",
+    description: "",
+    grade: "",
+    subject: "",
+    duration: "",
+    level: "beginner",
+    chapters: [{ ...initialChapter }]
+  });
+
+  // Chapter editing state
+  const [activeChapterIndex, setActiveChapterIndex] = useState(0);
+  const [chapterContentType, setChapterContentType] = useState("text"); // text, video, file
+
+  // Handle adding a new chapter
+  const handleAddChapter = () => {
+    setNewCourse(prev => ({
+      ...prev,
+      chapters: [...prev.chapters, { ...initialChapter }]
+    }));
+    setActiveChapterIndex(newCourse.chapters.length);
+  };
+
+  // Handle removing a chapter
+  const handleRemoveChapter = (index: number) => {
+    const updatedChapters = [...newCourse.chapters];
+    updatedChapters.splice(index, 1);
+    setNewCourse(prev => ({
+      ...prev,
+      chapters: updatedChapters
+    }));
+    // Update active chapter index if needed
+    if (activeChapterIndex >= updatedChapters.length) {
+      setActiveChapterIndex(Math.max(0, updatedChapters.length - 1));
+    }
+  };
+
+  // Handle updating chapter title
+  const handleUpdateChapterTitle = (index: number, title: string) => {
+    const updatedChapters = [...newCourse.chapters];
+    updatedChapters[index] = {
+      ...updatedChapters[index],
+      title
+    };
+    setNewCourse(prev => ({
+      ...prev,
+      chapters: updatedChapters
+    }));
+  };
+
+  // Handle updating chapter content
+  const handleUpdateChapterContent = (index: number, content: string) => {
+    const updatedChapters = [...newCourse.chapters];
+    updatedChapters[index] = {
+      ...updatedChapters[index],
+      content
+    };
+    setNewCourse(prev => ({
+      ...prev,
+      chapters: updatedChapters
+    }));
+  };
+
+  // Handle adding material to a chapter
+  const handleAddMaterial = (index: number, type: string, name: string) => {
+    const updatedChapters = [...newCourse.chapters];
+    updatedChapters[index] = {
+      ...updatedChapters[index],
+      materials: [
+        ...updatedChapters[index].materials,
+        { type, name, url: `mock-${type}-url-${Date.now()}` } // In a real app, this would be a real URL
+      ]
+    };
+    setNewCourse(prev => ({
+      ...prev,
+      chapters: updatedChapters
+    }));
+  };
+
+  // Handle removing material from a chapter
+  const handleRemoveMaterial = (chapterIndex: number, materialIndex: number) => {
+    const updatedChapters = [...newCourse.chapters];
+    updatedChapters[chapterIndex].materials.splice(materialIndex, 1);
+    setNewCourse(prev => ({
+      ...prev,
+      chapters: updatedChapters
+    }));
+  };
+
+  // Handle course form input changes
+  const handleCourseInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setNewCourse(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Handle form submission
+  const handleSubmitCourse = () => {
+    console.log('Submitting course:', newCourse);
+    // Here you would typically send this to your API
+    // Reset form and close dialog
+    setNewCourse({
+      title: "",
+      description: "",
+      grade: "",
+      subject: "",
+      duration: "",
+      level: "beginner",
+      chapters: [{ ...initialChapter }]
+    });
+    setShowAddDialog(false);
+  };
+
+  // Mock file upload handler
+  const handleFileUpload = (type: string) => {
+    // In a real app, this would handle actual file uploads
+    // For now, we'll just simulate adding a file with a mock name
+    const fileNames: Record<string, string> = {
+      'pdf': 'Chapter Material.pdf',
+      'ppt': 'Lecture Slides.ppt',
+      'video': 'Lecture Video.mp4'
+    };
+
+    handleAddMaterial(activeChapterIndex, type, fileNames[type]);
+  };
   
   return (
     <DashboardLayout 
@@ -200,95 +340,296 @@ export default function CoursesPage() {
         </div>
       </div>
       
-      {/* Add New Course Dialog */}
+      {/* Enhanced Add New Course Dialog with Chapter Management */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Add New Course</DialogTitle>
             <DialogDescription>
-              Fill in the details to create a new course for students.
+              Fill in the details and add chapters to create a comprehensive course.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input id="title" placeholder="Course title" />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea 
-                id="description" 
-                placeholder="Brief description of the course"
-                className="resize-none"
-                rows={3}
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
+          
+          <div className="flex flex-col md:flex-row gap-6 flex-1 overflow-hidden">
+            {/* Left side - Course details */}
+            <div className="md:w-1/3 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="grade">Grade</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select grade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((grade) => (
-                      <SelectItem key={grade} value={grade.toString()}>
-                        Grade {grade}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="title">Course Title</Label>
+                <Input 
+                  id="title" 
+                  name="title"
+                  value={newCourse.title}
+                  onChange={handleCourseInputChange}
+                  placeholder="e.g., Mathematics for Grade 5" 
+                />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="subject">Subject</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select subject" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="mathematics">Mathematics</SelectItem>
-                    <SelectItem value="science">Science</SelectItem>
-                    <SelectItem value="english">English</SelectItem>
-                    <SelectItem value="physics">Physics</SelectItem>
-                    <SelectItem value="chemistry">Chemistry</SelectItem>
-                    <SelectItem value="biology">Biology</SelectItem>
-                    <SelectItem value="computerscience">Computer Science</SelectItem>
-                    <SelectItem value="history">History</SelectItem>
-                    <SelectItem value="geography">Geography</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="description">Description</Label>
+                <Textarea 
+                  id="description" 
+                  name="description"
+                  value={newCourse.description}
+                  onChange={handleCourseInputChange}
+                  placeholder="Brief description of the course"
+                  className="resize-none"
+                  rows={3}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="grade">Grade</Label>
+                  <Select name="grade" value={newCourse.grade} onValueChange={(value) => setNewCourse(prev => ({ ...prev, grade: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select grade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((grade) => (
+                        <SelectItem key={grade} value={grade.toString()}>
+                          Grade {grade}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="subject">Subject</Label>
+                  <Select name="subject" value={newCourse.subject} onValueChange={(value) => setNewCourse(prev => ({ ...prev, subject: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select subject" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="mathematics">Mathematics</SelectItem>
+                      <SelectItem value="science">Science</SelectItem>
+                      <SelectItem value="english">English</SelectItem>
+                      <SelectItem value="physics">Physics</SelectItem>
+                      <SelectItem value="chemistry">Chemistry</SelectItem>
+                      <SelectItem value="biology">Biology</SelectItem>
+                      <SelectItem value="computerscience">Computer Science</SelectItem>
+                      <SelectItem value="history">History</SelectItem>
+                      <SelectItem value="geography">Geography</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="duration">Duration (weeks)</Label>
+                  <Input 
+                    id="duration" 
+                    name="duration"
+                    value={newCourse.duration}
+                    onChange={handleCourseInputChange}
+                    type="number" 
+                    min="1" 
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="level">Level</Label>
+                  <Select name="level" value={newCourse.level} onValueChange={(value) => setNewCourse(prev => ({ ...prev, level: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beginner">Beginner</SelectItem>
+                      <SelectItem value="intermediate">Intermediate</SelectItem>
+                      <SelectItem value="advanced">Advanced</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="pt-4">
+                <Button onClick={handleAddChapter} variant="outline" className="w-full">
+                  <Plus className="h-4 w-4 mr-2" /> Add Chapter
+                </Button>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="duration">Duration (weeks)</Label>
-                <Input id="duration" type="number" min="1" />
-              </div>
+            {/* Separator */}
+            <Separator orientation="vertical" className="hidden md:block" />
+            
+            {/* Right side - Chapters */}
+            <div className="md:w-2/3 flex flex-col overflow-hidden">
+              <div className="text-sm font-medium mb-2">Chapters</div>
               
-              <div className="space-y-2">
-                <Label htmlFor="level">Level</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="beginner">Beginner</SelectItem>
-                    <SelectItem value="intermediate">Intermediate</SelectItem>
-                    <SelectItem value="advanced">Advanced</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {newCourse.chapters.length > 0 ? (
+                <div className="flex flex-col h-full">
+                  {/* Chapter navigation */}
+                  <ScrollArea className="h-[80px] border rounded-md p-2 mb-4">
+                    <div className="flex gap-2">
+                      {newCourse.chapters.map((chapter, index) => (
+                        <div key={index} className="flex items-center">
+                          <Button 
+                            variant={activeChapterIndex === index ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setActiveChapterIndex(index)}
+                            className="text-xs flex items-center"
+                          >
+                            {chapter.title || `Chapter ${index + 1}`}
+                          </Button>
+                          {newCourse.chapters.length > 1 && (
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-6 w-6 ml-1"
+                              onClick={() => handleRemoveChapter(index)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                  
+                  {/* Active chapter editing */}
+                  <div className="flex-1 overflow-auto">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor={`chapter-${activeChapterIndex}-title`}>Chapter Title</Label>
+                        <Input 
+                          id={`chapter-${activeChapterIndex}-title`}
+                          value={newCourse.chapters[activeChapterIndex].title}
+                          onChange={(e) => handleUpdateChapterTitle(activeChapterIndex, e.target.value)}
+                          placeholder={`Chapter ${activeChapterIndex + 1}`}
+                        />
+                      </div>
+                      
+                      {/* Content type selector */}
+                      <div>
+                        <Label className="mb-2 block">Content Type</Label>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant={chapterContentType === "text" ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setChapterContentType("text")}
+                          >
+                            <FileText className="h-4 w-4 mr-2" /> Text Content
+                          </Button>
+                          <Button 
+                            variant={chapterContentType === "video" ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setChapterContentType("video")}
+                          >
+                            <Video className="h-4 w-4 mr-2" /> Video
+                          </Button>
+                          <Button 
+                            variant={chapterContentType === "file" ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setChapterContentType("file")}
+                          >
+                            <File className="h-4 w-4 mr-2" /> Files (PDF/PPT)
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      {/* Content editor based on type */}
+                      <div className="space-y-2 mt-4">
+                        {chapterContentType === "text" && (
+                          <>
+                            <Label htmlFor={`chapter-${activeChapterIndex}-content`}>Text Content</Label>
+                            <Textarea 
+                              id={`chapter-${activeChapterIndex}-content`}
+                              value={newCourse.chapters[activeChapterIndex].content}
+                              onChange={(e) => handleUpdateChapterContent(activeChapterIndex, e.target.value)}
+                              placeholder="Enter chapter content here..."
+                              className="resize-none min-h-[200px]"
+                            />
+                          </>
+                        )}
+                        
+                        {chapterContentType === "video" && (
+                          <div className="border rounded-md p-4">
+                            <Label className="mb-2 block">Upload Video</Label>
+                            <div className="flex items-center justify-center h-32 border-2 border-dashed rounded-md cursor-pointer hover:bg-muted/50"
+                              onClick={() => handleFileUpload('video')}
+                            >
+                              <div className="text-center">
+                                <Video className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                                <p className="text-sm text-muted-foreground">Click to upload video</p>
+                                <p className="text-xs text-muted-foreground">MP4, MOV up to 500MB</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {chapterContentType === "file" && (
+                          <div className="border rounded-md p-4">
+                            <Label className="mb-4 block">Upload Materials</Label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="flex items-center justify-center h-24 border-2 border-dashed rounded-md cursor-pointer hover:bg-muted/50"
+                                onClick={() => handleFileUpload('pdf')}
+                              >
+                                <div className="text-center">
+                                  <File className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                                  <p className="text-sm text-muted-foreground">Upload PDF</p>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center justify-center h-24 border-2 border-dashed rounded-md cursor-pointer hover:bg-muted/50"
+                                onClick={() => handleFileUpload('ppt')}
+                              >
+                                <div className="text-center">
+                                  <FileText className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                                  <p className="text-sm text-muted-foreground">Upload PPT</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Materials list */}
+                      {newCourse.chapters[activeChapterIndex].materials.length > 0 && (
+                        <div className="mt-4">
+                          <Label className="mb-2 block">Uploaded Materials</Label>
+                          <div className="space-y-2">
+                            {newCourse.chapters[activeChapterIndex].materials.map((material, idx) => (
+                              <div key={idx} className="flex justify-between items-center border rounded-md p-2">
+                                <div className="flex items-center">
+                                  {material.type === 'video' ? (
+                                    <Video className="h-4 w-4 mr-2" />
+                                  ) : material.type === 'pdf' ? (
+                                    <File className="h-4 w-4 mr-2" />
+                                  ) : (
+                                    <FileText className="h-4 w-4 mr-2" />
+                                  )}
+                                  <span className="text-sm">{material.name}</span>
+                                </div>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => handleRemoveMaterial(activeChapterIndex, idx)} 
+                                  className="h-6 w-6 p-0"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  <p>No chapters added yet</p>
+                </div>
+              )}
             </div>
           </div>
-          <DialogFooter>
+          
+          <DialogFooter className="mt-6">
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>
               Cancel
             </Button>
-            <Button type="submit">Create Course</Button>
+            <Button type="button" onClick={handleSubmitCourse}>Create Course</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
